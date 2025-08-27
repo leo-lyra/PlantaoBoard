@@ -8,7 +8,6 @@ import { PlantaoForm } from '@/components/PlantaoForm';
 import { PlantaoList } from '@/components/PlantaoList';
 import { PlantaoProvider } from '@/contexts/PlantaoContext';
 import { Toaster } from '@/components/ui/sonner';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -19,54 +18,41 @@ import Link from 'next/link';
 export default function AppPage() {
   const [activeTab, setActiveTab] = useState('home');
   const [user, setUser] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  const supabase = createClientComponentClient();
 
   useEffect(() => {
-    const getUser = async () => {
-      try {
-        const { data: { user }, error } = await supabase.auth.getUser();
-        
-        if (error || !user) {
-          router.push('/landing');
-          return;
-        }
+    // Verificar se usuário está logado
+    const userSession = localStorage.getItem('user-session');
+    if (!userSession) {
+      router.push('/login');
+      return;
+    }
 
-        setUser(user);
+    try {
+      const userData = JSON.parse(userSession);
+      setUser(userData);
+    } catch (error) {
+      console.error('Erro ao carregar sessão:', error);
+      router.push('/login');
+      return;
+    }
 
-        // Buscar perfil do usuário
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
+    setIsLoading(false);
+  }, [router]);
 
-        setProfile(profile);
-      } catch (error) {
-        console.error('Erro ao carregar usuário:', error);
-        router.push('/landing');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    getUser();
-  }, [router, supabase]);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
+  const handleLogout = () => {
+    localStorage.removeItem('user-session');
     router.push('/landing');
   };
 
   const getSubscriptionStatus = () => {
-    if (!profile) return null;
+    if (!user) return null;
 
     const now = new Date();
-    const trialEndsAt = profile.trial_ends_at ? new Date(profile.trial_ends_at) : null;
+    const trialEndsAt = user.trial_ends_at ? new Date(user.trial_ends_at) : null;
     
-    if (profile.subscription_status === 'active') {
+    if (user.subscription_status === 'active') {
       return {
         type: 'active',
         label: 'Pro Ativo',
@@ -134,7 +120,7 @@ export default function AppPage() {
               <div className="flex items-center gap-4">
                 <div>
                   <h2 className="font-semibold text-gray-900">
-                    Olá, {user?.user_metadata?.name || user?.email?.split('@')[0]}!
+                    Olá, {user?.name || user?.email?.split('@')[0]}!
                   </h2>
                   <p className="text-sm text-gray-600">
                     Bem-vindo ao PlantãoMed
