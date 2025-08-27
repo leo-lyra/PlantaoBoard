@@ -20,7 +20,7 @@ import { PeriodFilter } from '@/types/plantao';
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'];
 
 export function Dashboard() {
-  const { plantoes, getDashboardMetrics, getLocalStats } = usePlantao();
+  const { plantoes, getDashboardMetrics, getLocalStats, getUniqueLocais } = usePlantao();
   
   const [filtro, setFiltro] = useState<PeriodFilter>({
     tipo: 'mes',
@@ -28,17 +28,23 @@ export function Dashboard() {
     fim: new Date().toISOString().split('T')[0]
   });
 
+  const [filtroLocal, setFiltroLocal] = useState<string>('all');
+
   const plantoesFiltrados = useMemo(() => {
     return plantoes.filter(plantao => {
       const plantaoDate = new Date(plantao.data);
       const inicio = new Date(filtro.inicio);
       const fim = new Date(filtro.fim);
-      return plantaoDate >= inicio && plantaoDate <= fim;
+      const matchPeriodo = plantaoDate >= inicio && plantaoDate <= fim;
+      const matchLocal = filtroLocal === 'all' || plantao.local === filtroLocal;
+      
+      return matchPeriodo && matchLocal;
     });
-  }, [plantoes, filtro]);
+  }, [plantoes, filtro, filtroLocal]);
 
   const metrics = getDashboardMetrics(plantoesFiltrados);
   const localStats = getLocalStats(plantoesFiltrados);
+  const locaisUnicos = getUniqueLocais();
 
   // Calcular total à receber
   const totalAReceber = useMemo(() => {
@@ -72,9 +78,11 @@ export function Dashboard() {
   }, [plantoes]);
 
   const statusData = useMemo(() => {
-    const status = { Recebido: 0, 'À Receber': 0, Atrasado: 0 };
+    const status = { Recebido: 0, 'À Receber': 0 };
     plantoesFiltrados.forEach(plantao => {
-      status[plantao.statusPagamento]++;
+      if (plantao.statusPagamento === 'Recebido' || plantao.statusPagamento === 'À Receber') {
+        status[plantao.statusPagamento]++;
+      }
     });
     
     return Object.entries(status).map(([name, value]) => ({ name, value }));
@@ -107,6 +115,15 @@ export function Dashboard() {
       inicio: inicio.toISOString().split('T')[0],
       fim: fim.toISOString().split('T')[0]
     });
+  };
+
+  const limparFiltros = () => {
+    setFiltro({
+      tipo: 'mes',
+      inicio: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
+      fim: new Date().toISOString().split('T')[0]
+    });
+    setFiltroLocal('all');
   };
 
   const metricsCards = [
@@ -170,7 +187,7 @@ export function Dashboard() {
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-xl">
             <Filter className="h-5 w-5 text-blue-600" />
-            Filtros de Período
+            Filtros de Período e Local
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -210,6 +227,29 @@ export function Dashboard() {
                 className="h-11 border-2 border-gray-200 rounded-xl"
               />
             </div>
+
+            <div className="space-y-2">
+              <Label className="font-medium">Local do Plantão</Label>
+              <Select value={filtroLocal} onValueChange={setFiltroLocal}>
+                <SelectTrigger className="w-48 h-11 border-2 border-gray-200 rounded-xl">
+                  <SelectValue placeholder="Todos os locais" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os locais</SelectItem>
+                  {locaisUnicos.map(local => (
+                    <SelectItem key={local} value={local}>{local}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button 
+              variant="outline" 
+              className="h-11 px-6 border-2 border-gray-200 rounded-xl hover:border-blue-500"
+              onClick={limparFiltros}
+            >
+              Limpar Filtros
+            </Button>
           </div>
         </CardContent>
       </Card>
