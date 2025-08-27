@@ -67,14 +67,16 @@ export function PlantaoForm({ plantao, onSuccess }: PlantaoFormProps) {
   const onSubmit = (data: PlantaoFormData) => {
     const plantaoData = {
       ...data,
-      statusPagamento: plantao?.statusPagamento || 'Pendente' as const,
+      statusPagamento: plantao?.statusPagamento || 'À Receber' as const,
       numeroNotaFiscal: plantao?.numeroNotaFiscal,
     };
 
     if (plantao) {
       updatePlantao(plantao.id, plantaoData);
+      toast.success('Plantão atualizado com sucesso!');
     } else {
       addPlantao(plantaoData);
+      toast.success('Plantão cadastrado com sucesso! Status: À Receber');
       reset();
     }
 
@@ -94,6 +96,13 @@ export function PlantaoForm({ plantao, onSuccess }: PlantaoFormProps) {
         <p className="text-gray-600 text-lg">
           {plantao ? 'Atualize as informações do seu plantão' : 'Registre os detalhes do seu plantão médico'}
         </p>
+        {!plantao && (
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-100 border border-yellow-200 rounded-lg">
+            <span className="text-yellow-800 text-sm font-medium">
+              Status padrão: À Receber
+            </span>
+          </div>
+        )}
       </div>
 
       <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-sm">

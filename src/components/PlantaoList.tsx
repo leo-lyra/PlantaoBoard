@@ -8,21 +8,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { 
   Search, Filter, Edit, Trash2, Calendar, MapPin, 
-  Clock, DollarSign, FileText, AlertCircle 
+  Clock, DollarSign, FileText, AlertCircle, Check, X,
+  Save, CheckCircle
 } from 'lucide-react';
 import { usePlantao } from '@/contexts/PlantaoContext';
 import { Plantao } from '@/types/plantao';
-import { PlantaoForm } from './PlantaoForm';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { HospitalSelector } from './HospitalSelector';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
 
 export function PlantaoList() {
-  const { plantoes, deletePlantao, getUniqueLocais } = usePlantao();
+  const { plantoes, deletePlantao, updatePlantao, getUniqueLocais } = usePlantao();
   const [busca, setBusca] = useState('');
   const [filtroLocal, setFiltroLocal] = useState('');
   const [filtroStatus, setFiltroStatus] = useState('');
-  const [editandoPlantao, setEditandoPlantao] = useState<Plantao | null>(null);
-  const [dialogAberto, setDialogAberto] = useState(false);
+  const [editandoId, setEditandoId] = useState<string | null>(null);
+  const [editData, setEditData] = useState<Partial<Plantao>>({});
 
   const locaisUnicos = getUniqueLocais();
 
@@ -39,34 +40,73 @@ export function PlantaoList() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Pago': return 'bg-green-100 text-green-800';
-      case 'Pendente': return 'bg-yellow-100 text-yellow-800';
-      case 'Atrasado': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'Recebido': return 'bg-green-100 text-green-800 border-green-200';
+      case 'À Receber': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'Atrasado': return 'bg-red-100 text-red-800 border-red-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
-  const handleEdit = (plantao: Plantao) => {
-    setEditandoPlantao(plantao);
-    setDialogAberto(true);
+  const iniciarEdicao = (plantao: Plantao) => {
+    setEditandoId(plantao.id);
+    setEditData({
+      local: plantao.local,
+      data: plantao.data,
+      horasTrabalhadas: plantao.horasTrabalhadas,
+      valorRecebido: plantao.valorRecebido,
+      imposto: plantao.imposto,
+    });
   };
 
-  const handleEditSuccess = () => {
-    setEditandoPlantao(null);
-    setDialogAberto(false);
+  const cancelarEdicao = () => {
+    setEditandoId(null);
+    setEditData({});
+  };
+
+  const salvarEdicao = (id: string) => {
+    if (editData.local && editData.data && editData.horasTrabalhadas && editData.valorRecebido !== undefined && editData.imposto !== undefined) {
+      updatePlantao(id, editData);
+      setEditandoId(null);
+      setEditData({});
+    } else {
+      toast.error('Preencha todos os campos obrigatórios');
+    }
+  };
+
+  const alterarStatus = (id: string, novoStatus: 'Recebido' | 'À Receber' | 'Atrasado') => {
+    updatePlantao(id, { statusPagamento: novoStatus });
   };
 
   const handleDelete = (id: string) => {
     deletePlantao(id);
   };
 
+  const calcularValorLiquido = (valor: number, imposto: number) => {
+    return valor - imposto;
+  };
+
+  const calcularValorPorHora = (valor: number, horas: number) => {
+    return horas > 0 ? valor / horas : 0;
+  };
+
   return (
     <div className="space-y-6">
+      {/* Header */}
+      <div className="text-center space-y-4">
+        <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl shadow-lg">
+          <FileText className="h-6 w-6 text-white" />
+          <h1 className="text-xl font-bold text-white">Meus Plantões</h1>
+        </div>
+        <p className="text-gray-600 text-lg">
+          Planilha completa com todos os seus plantões registrados
+        </p>
+      </div>
+
       {/* Filtros */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
+      <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <Filter className="h-5 w-5 text-emerald-600" />
             Filtros e Busca
           </CardTitle>
         </CardHeader>
@@ -79,13 +119,13 @@ export function PlantaoList() {
                   placeholder="Buscar por local ou número da NF..."
                   value={busca}
                   onChange={(e) => setBusca(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 h-11 border-2 border-gray-200 rounded-xl"
                 />
               </div>
             </div>
 
             <Select value={filtroLocal} onValueChange={setFiltroLocal}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-48 h-11 border-2 border-gray-200 rounded-xl">
                 <SelectValue placeholder="Filtrar por local" />
               </SelectTrigger>
               <SelectContent>
@@ -97,19 +137,20 @@ export function PlantaoList() {
             </Select>
 
             <Select value={filtroStatus} onValueChange={setFiltroStatus}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-48 h-11 border-2 border-gray-200 rounded-xl">
                 <SelectValue placeholder="Filtrar por status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="">Todos os status</SelectItem>
-                <SelectItem value="Pago">Pago</SelectItem>
-                <SelectItem value="Pendente">Pendente</SelectItem>
+                <SelectItem value="Recebido">Recebido</SelectItem>
+                <SelectItem value="À Receber">À Receber</SelectItem>
                 <SelectItem value="Atrasado">Atrasado</SelectItem>
               </SelectContent>
             </Select>
 
             <Button 
               variant="outline" 
+              className="h-11 px-6 border-2 border-gray-200 rounded-xl hover:border-emerald-500"
               onClick={() => {
                 setBusca('');
                 setFiltroLocal('');
@@ -122,11 +163,11 @@ export function PlantaoList() {
         </CardContent>
       </Card>
 
-      {/* Lista de Plantões */}
-      <div className="space-y-4">
-        {plantoesFiltrados.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
+      {/* Planilha de Plantões */}
+      <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+        <CardContent className="p-0">
+          {plantoesFiltrados.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12">
               <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">Nenhum plantão encontrado</h3>
               <p className="text-muted-foreground text-center">
@@ -135,139 +176,253 @@ export function PlantaoList() {
                   : 'Tente ajustar os filtros para encontrar os plantões desejados.'
                 }
               </p>
-            </CardContent>
-          </Card>
-        ) : (
-          plantoesFiltrados.map((plantao) => (
-            <Card key={plantao.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                  <div className="flex-1 space-y-3">
-                    <div className="flex items-center gap-4 flex-wrap">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-semibold">{plantao.local}</span>
-                      </div>
-                      <Badge className={getStatusColor(plantao.statusPagamento)}>
-                        {plantao.statusPagamento}
-                      </Badge>
-                    </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span>{new Date(plantao.data).toLocaleDateString('pt-BR')}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span>{plantao.horasTrabalhadas}h</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4 text-muted-foreground" />
-                        <span>R$ {plantao.valorRecebido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                      </div>
-                      {plantao.numeroNotaFiscal && (
-                        <div className="flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-muted-foreground" />
-                          <span>NF: {plantao.numeroNotaFiscal}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="text-sm text-muted-foreground">
-                      <span>Valor/hora: R$ {(plantao.valorRecebido / plantao.horasTrabalhadas).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                      <span className="mx-2">•</span>
-                      <span>Imposto: R$ {plantao.imposto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                      <span className="mx-2">•</span>
-                      <span>Líquido: R$ {(plantao.valorRecebido - plantao.imposto).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Dialog open={dialogAberto && editandoPlantao?.id === plantao.id} onOpenChange={setDialogAberto}>
-                      <DialogTrigger asChild>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleEdit(plantao)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                        <DialogHeader>
-                          <DialogTitle>Editar Plantão</DialogTitle>
-                        </DialogHeader>
-                        {editandoPlantao && (
-                          <PlantaoForm 
-                            plantao={editandoPlantao} 
-                            onSuccess={handleEditSuccess}
-                          />
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
+                  <tr>
+                    <th className="text-left p-4 font-semibold text-gray-900 min-w-[200px]">Local</th>
+                    <th className="text-center p-4 font-semibold text-gray-900 min-w-[120px]">Data</th>
+                    <th className="text-center p-4 font-semibold text-gray-900 min-w-[100px]">Horas</th>
+                    <th className="text-right p-4 font-semibold text-gray-900 min-w-[130px]">Valor Bruto</th>
+                    <th className="text-right p-4 font-semibold text-gray-900 min-w-[120px]">Imposto</th>
+                    <th className="text-right p-4 font-semibold text-gray-900 min-w-[130px]">Valor Líquido</th>
+                    <th className="text-right p-4 font-semibold text-gray-900 min-w-[120px]">Valor/Hora</th>
+                    <th className="text-center p-4 font-semibold text-gray-900 min-w-[120px]">Status</th>
+                    <th className="text-center p-4 font-semibold text-gray-900 min-w-[140px]">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {plantoesFiltrados.map((plantao, index) => (
+                    <tr key={plantao.id} className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
+                      {/* Local */}
+                      <td className="p-3">
+                        {editandoId === plantao.id ? (
+                          <div className="min-w-[180px]">
+                            <HospitalSelector
+                              value={editData.local || ''}
+                              onChange={(value) => setEditData(prev => ({ ...prev, local: value }))}
+                            />
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                            <span className="font-medium text-gray-900 truncate">{plantao.local}</span>
+                          </div>
                         )}
-                      </DialogContent>
-                    </Dialog>
+                      </td>
 
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Tem certeza que deseja excluir este plantão? Esta ação não pode ser desfeita.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => handleDelete(plantao.id)}>
-                            Excluir
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
+                      {/* Data */}
+                      <td className="p-3 text-center">
+                        {editandoId === plantao.id ? (
+                          <Input
+                            type="date"
+                            value={editData.data || ''}
+                            onChange={(e) => setEditData(prev => ({ ...prev, data: e.target.value }))}
+                            className="w-full h-9 text-sm border border-gray-300 rounded-lg"
+                          />
+                        ) : (
+                          <span className="text-gray-700">
+                            {new Date(plantao.data).toLocaleDateString('pt-BR')}
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Horas */}
+                      <td className="p-3 text-center">
+                        {editandoId === plantao.id ? (
+                          <Input
+                            type="number"
+                            step="0.5"
+                            value={editData.horasTrabalhadas || ''}
+                            onChange={(e) => setEditData(prev => ({ ...prev, horasTrabalhadas: Number(e.target.value) }))}
+                            className="w-full h-9 text-sm border border-gray-300 rounded-lg text-center"
+                          />
+                        ) : (
+                          <span className="text-gray-700 font-medium">{plantao.horasTrabalhadas}h</span>
+                        )}
+                      </td>
+
+                      {/* Valor Bruto */}
+                      <td className="p-3 text-right">
+                        {editandoId === plantao.id ? (
+                          <Input
+                            type="number"
+                            step="0.01"
+                            value={editData.valorRecebido || ''}
+                            onChange={(e) => setEditData(prev => ({ ...prev, valorRecebido: Number(e.target.value) }))}
+                            className="w-full h-9 text-sm border border-gray-300 rounded-lg text-right"
+                          />
+                        ) : (
+                          <span className="font-semibold text-emerald-600">
+                            R$ {plantao.valorRecebido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Imposto */}
+                      <td className="p-3 text-right">
+                        {editandoId === plantao.id ? (
+                          <Input
+                            type="number"
+                            step="0.01"
+                            value={editData.imposto || ''}
+                            onChange={(e) => setEditData(prev => ({ ...prev, imposto: Number(e.target.value) }))}
+                            className="w-full h-9 text-sm border border-gray-300 rounded-lg text-right"
+                          />
+                        ) : (
+                          <span className="text-red-600 font-medium">
+                            R$ {plantao.imposto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Valor Líquido */}
+                      <td className="p-3 text-right">
+                        <span className="font-bold text-blue-600">
+                          R$ {calcularValorLiquido(
+                            editandoId === plantao.id ? (editData.valorRecebido || 0) : plantao.valorRecebido,
+                            editandoId === plantao.id ? (editData.imposto || 0) : plantao.imposto
+                          ).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </span>
+                      </td>
+
+                      {/* Valor/Hora */}
+                      <td className="p-3 text-right">
+                        <span className="text-purple-600 font-medium">
+                          R$ {calcularValorPorHora(
+                            editandoId === plantao.id ? (editData.valorRecebido || 0) : plantao.valorRecebido,
+                            editandoId === plantao.id ? (editData.horasTrabalhadas || 1) : plantao.horasTrabalhadas
+                          ).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </span>
+                      </td>
+
+                      {/* Status */}
+                      <td className="p-3 text-center">
+                        <div className="flex flex-col gap-2">
+                          <Badge className={`${getStatusColor(plantao.statusPagamento)} border font-medium`}>
+                            {plantao.statusPagamento}
+                          </Badge>
+                          {plantao.statusPagamento === 'À Receber' && (
+                            <Button
+                              size="sm"
+                              className="h-7 px-3 bg-green-600 hover:bg-green-700 text-white text-xs rounded-lg"
+                              onClick={() => alterarStatus(plantao.id, 'Recebido')}
+                            >
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Recebido
+                            </Button>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Ações */}
+                      <td className="p-3">
+                        <div className="flex items-center justify-center gap-2">
+                          {editandoId === plantao.id ? (
+                            <>
+                              <Button
+                                size="sm"
+                                className="h-8 w-8 p-0 bg-green-600 hover:bg-green-700"
+                                onClick={() => salvarEdicao(plantao.id)}
+                              >
+                                <Save className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 w-8 p-0 border-gray-300 hover:border-red-500 hover:bg-red-50"
+                                onClick={cancelarEdicao}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 w-8 p-0 border-gray-300 hover:border-blue-500 hover:bg-blue-50"
+                                onClick={() => iniciarEdicao(plantao)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    className="h-8 w-8 p-0 border-gray-300 hover:border-red-500 hover:bg-red-50"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Tem certeza que deseja excluir este plantão? Esta ação não pode ser desfeita.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDelete(plantao.id)}>
+                                      Excluir
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Resumo */}
       {plantoesFiltrados.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Resumo dos Plantões Filtrados</CardTitle>
+        <Card className="border-0 shadow-lg bg-gradient-to-r from-emerald-50 to-teal-50">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-xl text-emerald-800">Resumo dos Plantões</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <div>
-                <span className="text-muted-foreground">Total de Plantões:</span>
-                <div className="font-semibold">{plantoesFiltrados.length}</div>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-emerald-600">
+                  {plantoesFiltrados.length}
+                </div>
+                <div className="text-sm text-emerald-700 font-medium">Total de Plantões</div>
               </div>
-              <div>
-                <span className="text-muted-foreground">Total Recebido:</span>
-                <div className="font-semibold">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">
                   R$ {plantoesFiltrados.reduce((sum, p) => sum + p.valorRecebido, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
+                <div className="text-sm text-blue-700 font-medium">Total Bruto</div>
               </div>
-              <div>
-                <span className="text-muted-foreground">Total de Horas:</span>
-                <div className="font-semibold">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-red-600">
+                  R$ {plantoesFiltrados.reduce((sum, p) => sum + p.imposto, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </div>
+                <div className="text-sm text-red-700 font-medium">Total Impostos</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600">
+                  R$ {plantoesFiltrados.reduce((sum, p) => sum + (p.valorRecebido - p.imposto), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </div>
+                <div className="text-sm text-purple-700 font-medium">Total Líquido</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-orange-600">
                   {plantoesFiltrados.reduce((sum, p) => sum + p.horasTrabalhadas, 0)}h
                 </div>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Valor Médio/Hora:</span>
-                <div className="font-semibold">
-                  R$ {(
-                    plantoesFiltrados.reduce((sum, p) => sum + p.valorRecebido, 0) /
-                    plantoesFiltrados.reduce((sum, p) => sum + p.horasTrabalhadas, 0)
-                  ).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </div>
+                <div className="text-sm text-orange-700 font-medium">Total de Horas</div>
               </div>
             </div>
           </CardContent>

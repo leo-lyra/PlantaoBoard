@@ -61,7 +61,7 @@ export function Dashboard() {
   }, [plantoes]);
 
   const statusData = useMemo(() => {
-    const status = { Pago: 0, Pendente: 0, Atrasado: 0 };
+    const status = { Recebido: 0, 'À Receber': 0, Atrasado: 0 };
     plantoesFiltrados.forEach(plantao => {
       status[plantao.statusPagamento]++;
     });

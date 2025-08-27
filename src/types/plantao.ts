@@ -5,7 +5,7 @@ export interface Plantao {
   horasTrabalhadas: number;
   valorRecebido: number;
   imposto: number;
-  statusPagamento: 'Pago' | 'Pendente' | 'Atrasado';
+  statusPagamento: 'Recebido' | 'À Receber' | 'Atrasado';
   numeroNotaFiscal?: string;
   anexo?: string;
   // Coordenadas para futuro mapa
