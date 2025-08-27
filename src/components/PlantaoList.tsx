@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import { usePlantao } from '@/contexts/PlantaoContext';
 import { Plantao } from '@/types/plantao';
-import { HospitalSelector } from './HospitalSelector';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 
@@ -199,12 +198,12 @@ export function PlantaoList() {
                       {/* Local */}
                       <td className="p-3">
                         {editandoId === plantao.id ? (
-                          <div className="min-w-[180px]">
-                            <HospitalSelector
-                              value={editData.local || ''}
-                              onChange={(value) => setEditData(prev => ({ ...prev, local: value }))}
-                            />
-                          </div>
+                          <Input
+                            value={editData.local || ''}
+                            onChange={(e) => setEditData(prev => ({ ...prev, local: e.target.value }))}
+                            className="w-full h-9 text-sm border border-gray-300 rounded-lg"
+                            placeholder="Local do plantão"
+                          />
                         ) : (
                           <div className="flex items-center gap-2">
                             <MapPin className="h-4 w-4 text-gray-500 flex-shrink-0" />
