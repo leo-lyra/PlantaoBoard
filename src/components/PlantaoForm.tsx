@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CalendarIcon, Calculator, Clock, DollarSign, Percent, CheckCircle } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { CalendarIcon, Calculator, Clock, DollarSign, Percent, CheckCircle, Receipt } from 'lucide-react';
 import { usePlantao } from '@/contexts/PlantaoContext';
 import { Plantao } from '@/types/plantao';
 import { HospitalSelector } from './HospitalSelector';
@@ -31,6 +32,7 @@ interface PlantaoFormProps {
 
 export function PlantaoForm({ plantao, onSuccess }: PlantaoFormProps) {
   const { addPlantao, updatePlantao } = usePlantao();
+  const [temImposto, setTemImposto] = useState(plantao ? plantao.imposto > 0 : false);
   const [calcularImpostoAuto, setCalcularImpostoAuto] = useState(true);
   const [percentualImposto, setPercentualImposto] = useState(11);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -52,6 +54,7 @@ export function PlantaoForm({ plantao, onSuccess }: PlantaoFormProps) {
       imposto: plantao.imposto,
     } : {
       data: new Date().toISOString().split('T')[0],
+      imposto: 0,
     }
   });
 
@@ -62,14 +65,16 @@ export function PlantaoForm({ plantao, onSuccess }: PlantaoFormProps) {
 
   // Cálculo automático do imposto
   React.useEffect(() => {
-    if (calcularImpostoAuto && valorRecebido) {
+    if (temImposto && calcularImpostoAuto && valorRecebido) {
       const impostoCalculado = (valorRecebido * percentualImposto) / 100;
       setValue('imposto', Number(impostoCalculado.toFixed(2)));
+    } else if (!temImposto) {
+      setValue('imposto', 0);
     }
-  }, [valorRecebido, percentualImposto, calcularImpostoAuto, setValue]);
+  }, [valorRecebido, percentualImposto, calcularImpostoAuto, temImposto, setValue]);
 
   // Cálculos em tempo real
-  const valorLiquido = valorRecebido && imposto ? valorRecebido - imposto : 0;
+  const valorLiquido = valorRecebido && imposto !== undefined ? valorRecebido - imposto : 0;
   const valorPorHora = valorRecebido && horasTrabalhadas ? valorRecebido / horasTrabalhadas : 0;
 
   const onSubmit = async (data: PlantaoFormData) => {
@@ -78,6 +83,7 @@ export function PlantaoForm({ plantao, onSuccess }: PlantaoFormProps) {
     try {
       const plantaoData = {
         ...data,
+        imposto: temImposto ? data.imposto : 0,
         statusPagamento: plantao?.statusPagamento || 'À Receber' as const,
         numeroNotaFiscal: plantao?.numeroNotaFiscal,
       };
@@ -93,6 +99,7 @@ export function PlantaoForm({ plantao, onSuccess }: PlantaoFormProps) {
           description: 'Status: À Receber • Disponível na planilha de plantões.',
         });
         reset();
+        setTemImposto(false);
       }
 
       onSuccess?.();
@@ -181,7 +188,7 @@ export function PlantaoForm({ plantao, onSuccess }: PlantaoFormProps) {
               <div className="space-y-3">
                 <Label className="text-base font-semibold text-gray-900 flex items-center gap-2">
                   <DollarSign className="h-5 w-5 text-green-600" />
-                  Valor Recebido (R$)
+                  Valor do Plantão (R$)
                 </Label>
                 <Input
                   type="number"
@@ -228,61 +235,84 @@ export function PlantaoForm({ plantao, onSuccess }: PlantaoFormProps) {
               </Card>
             )}
 
-            {/* Imposto */}
+            {/* Checkbox Tem Imposto */}
             <div className="space-y-6 p-6 bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl border border-gray-200">
-              <div className="flex items-center justify-between">
-                <Label className="text-base font-semibold text-gray-900 flex items-center gap-2">
-                  <Calculator className="h-5 w-5 text-orange-600" />
-                  Cálculo do Imposto
+              <div className="flex items-center space-x-3">
+                <Checkbox
+                  id="temImposto"
+                  checked={temImposto}
+                  onCheckedChange={(checked) => setTemImposto(checked as boolean)}
+                  className="w-5 h-5"
+                />
+                <Label 
+                  htmlFor="temImposto" 
+                  className="text-base font-semibold text-gray-900 flex items-center gap-2 cursor-pointer"
+                >
+                  <Receipt className="h-5 w-5 text-orange-600" />
+                  Este plantão tem desconto de imposto?
                 </Label>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={calcularImpostoAuto}
-                    onChange={(e) => setCalcularImpostoAuto(e.target.checked)}
-                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                  />
-                  <span className="text-sm font-medium text-gray-700">Calcular automaticamente</span>
-                </div>
               </div>
 
-              {calcularImpostoAuto && (
-                <div className="flex items-center gap-4 p-4 bg-white rounded-xl border border-gray-200">
-                  <Percent className="h-5 w-5 text-orange-600" />
-                  <Label className="font-medium text-gray-700">Percentual:</Label>
-                  <Input
-                    type="number"
-                    step="0.1"
-                    value={percentualImposto}
-                    onChange={(e) => setPercentualImposto(Number(e.target.value))}
-                    className="w-24 h-10 border-2 border-gray-200 rounded-lg focus:border-orange-500"
-                  />
-                  <span className="text-gray-600 font-medium">%</span>
-                  <div className="ml-auto text-sm text-gray-600">
-                    Sugestão: MEI 11% • Simples 15-20%
+              {/* Seção de Imposto - Condicional */}
+              {temImposto && (
+                <div className="space-y-6 p-6 bg-white rounded-xl border border-gray-200 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                      <Calculator className="h-5 w-5 text-orange-600" />
+                      Cálculo do Imposto
+                    </Label>
+                    <div className="flex items-center gap-3">
+                      <Checkbox
+                        id="calcularAuto"
+                        checked={calcularImpostoAuto}
+                        onCheckedChange={(checked) => setCalcularImpostoAuto(checked as boolean)}
+                        className="w-4 h-4"
+                      />
+                      <Label htmlFor="calcularAuto" className="text-sm font-medium text-gray-700 cursor-pointer">
+                        Calcular automaticamente
+                      </Label>
+                    </div>
+                  </div>
+
+                  {calcularImpostoAuto && (
+                    <div className="flex items-center gap-4 p-4 bg-orange-50 rounded-xl border border-orange-200">
+                      <Percent className="h-5 w-5 text-orange-600" />
+                      <Label className="font-medium text-gray-700">Percentual:</Label>
+                      <Input
+                        type="number"
+                        step="0.1"
+                        value={percentualImposto}
+                        onChange={(e) => setPercentualImposto(Number(e.target.value))}
+                        className="w-24 h-10 border-2 border-gray-200 rounded-lg focus:border-orange-500"
+                      />
+                      <span className="text-gray-600 font-medium">%</span>
+                      <div className="ml-auto text-sm text-gray-600">
+                        Sugestão: MEI 11% • Simples 15-20%
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold text-gray-900">
+                      Valor do Imposto (R$)
+                    </Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      {...register('imposto', { valueAsNumber: true })}
+                      placeholder="Ex: 132.00"
+                      disabled={calcularImpostoAuto}
+                      className="h-12 border-2 border-gray-200 rounded-xl focus:border-orange-500 transition-colors disabled:bg-gray-100"
+                    />
+                    {errors.imposto && (
+                      <p className="text-sm text-red-500 flex items-center gap-1">
+                        <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+                        {errors.imposto.message}
+                      </p>
+                    )}
                   </div>
                 </div>
               )}
-
-              <div className="space-y-3">
-                <Label className="text-base font-semibold text-gray-900">
-                  Valor do Imposto (R$)
-                </Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  {...register('imposto', { valueAsNumber: true })}
-                  placeholder="Ex: 132.00"
-                  disabled={calcularImpostoAuto}
-                  className="h-12 border-2 border-gray-200 rounded-xl focus:border-orange-500 transition-colors disabled:bg-gray-100"
-                />
-                {errors.imposto && (
-                  <p className="text-sm text-red-500 flex items-center gap-1">
-                    <span className="w-1 h-1 bg-red-500 rounded-full"></span>
-                    {errors.imposto.message}
-                  </p>
-                )}
-              </div>
             </div>
 
             <Button 

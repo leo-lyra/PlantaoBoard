@@ -19,19 +19,20 @@ import { toast } from 'sonner';
 export function PlantaoList() {
   const { plantoes, deletePlantao, updatePlantao, getUniqueLocais } = usePlantao();
   const [busca, setBusca] = useState('');
-  const [filtroLocal, setFiltroLocal] = useState('');
-  const [filtroStatus, setFiltroStatus] = useState('');
+  const [filtroLocal, setFiltroLocal] = useState('all');
+  const [filtroStatus, setFiltroStatus] = useState('all');
   const [editandoId, setEditandoId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Partial<Plantao>>({});
 
-  const locaisUnicos = getUniqueLocais();
+  // Filtrar locais únicos removendo valores vazios ou inválidos
+  const locaisUnicos = getUniqueLocais().filter(local => local && local.trim().length > 0);
 
   const plantoesFiltrados = useMemo(() => {
     return plantoes.filter(plantao => {
       const matchBusca = plantao.local.toLowerCase().includes(busca.toLowerCase()) ||
                         plantao.numeroNotaFiscal?.toLowerCase().includes(busca.toLowerCase());
-      const matchLocal = !filtroLocal || plantao.local === filtroLocal;
-      const matchStatus = !filtroStatus || plantao.statusPagamento === filtroStatus;
+      const matchLocal = filtroLocal === 'all' || plantao.local === filtroLocal;
+      const matchStatus = filtroStatus === 'all' || plantao.statusPagamento === filtroStatus;
       
       return matchBusca && matchLocal && matchStatus;
     }).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
@@ -128,7 +129,7 @@ export function PlantaoList() {
                 <SelectValue placeholder="Filtrar por local" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos os locais</SelectItem>
+                <SelectItem value="all">Todos os locais</SelectItem>
                 {locaisUnicos.map(local => (
                   <SelectItem key={local} value={local}>{local}</SelectItem>
                 ))}
@@ -140,7 +141,7 @@ export function PlantaoList() {
                 <SelectValue placeholder="Filtrar por status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos os status</SelectItem>
+                <SelectItem value="all">Todos os status</SelectItem>
                 <SelectItem value="Recebido">Recebido</SelectItem>
                 <SelectItem value="À Receber">À Receber</SelectItem>
                 <SelectItem value="Atrasado">Atrasado</SelectItem>
@@ -152,8 +153,8 @@ export function PlantaoList() {
               className="h-11 px-6 border-2 border-gray-200 rounded-xl hover:border-emerald-500"
               onClick={() => {
                 setBusca('');
-                setFiltroLocal('');
-                setFiltroStatus('');
+                setFiltroLocal('all');
+                setFiltroStatus('all');
               }}
             >
               Limpar Filtros
