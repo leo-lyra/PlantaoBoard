@@ -12,12 +12,12 @@ import {
 } from 'recharts';
 import { 
   DollarSign, Clock, Calendar, TrendingUp, MapPin, 
-  FileText, AlertCircle, Target, Filter
+  FileText, AlertCircle, Target, Filter, Sparkles
 } from 'lucide-react';
 import { usePlantao } from '@/contexts/PlantaoContext';
 import { PeriodFilter } from '@/types/plantao';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
+const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'];
 
 export function Dashboard() {
   const { plantoes, getDashboardMetrics, getLocalStats } = usePlantao();
@@ -28,7 +28,6 @@ export function Dashboard() {
     fim: new Date().toISOString().split('T')[0]
   });
 
-  // Filtrar plantões pelo período
   const plantoesFiltrados = useMemo(() => {
     return plantoes.filter(plantao => {
       const plantaoDate = new Date(plantao.data);
@@ -41,7 +40,6 @@ export function Dashboard() {
   const metrics = getDashboardMetrics(plantoesFiltrados);
   const localStats = getLocalStats(plantoesFiltrados);
 
-  // Dados para gráfico de evolução mensal
   const evolucaoMensal = useMemo(() => {
     const meses = new Map();
     
@@ -62,7 +60,6 @@ export function Dashboard() {
     return Array.from(meses.values()).sort((a, b) => a.mes.localeCompare(b.mes));
   }, [plantoes]);
 
-  // Dados para gráfico de status de pagamento
   const statusData = useMemo(() => {
     const status = { Pago: 0, Pendente: 0, Atrasado: 0 };
     plantoesFiltrados.forEach(plantao => {
@@ -101,22 +98,68 @@ export function Dashboard() {
     });
   };
 
+  const metricsCards = [
+    {
+      title: 'Total Recebido',
+      value: `R$ ${metrics.totalRecebido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      subtitle: `Líquido: R$ ${metrics.valorLiquido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      icon: DollarSign,
+      gradient: 'from-emerald-500 to-teal-600',
+      bgGradient: 'from-emerald-50 to-teal-50'
+    },
+    {
+      title: 'Horas Trabalhadas',
+      value: `${metrics.totalHoras}h`,
+      subtitle: `Média: ${metrics.valorMedioHora.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} R$/h`,
+      icon: Clock,
+      gradient: 'from-blue-500 to-indigo-600',
+      bgGradient: 'from-blue-50 to-indigo-50'
+    },
+    {
+      title: 'Total de Plantões',
+      value: metrics.totalPlantoes.toString(),
+      subtitle: `Média: R$ ${metrics.valorMedioPlantao.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      icon: Calendar,
+      gradient: 'from-purple-500 to-pink-600',
+      bgGradient: 'from-purple-50 to-pink-50'
+    },
+    {
+      title: 'Impostos Pagos',
+      value: `R$ ${metrics.impostoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      subtitle: `${metrics.totalRecebido > 0 ? ((metrics.impostoTotal / metrics.totalRecebido) * 100).toFixed(1) : 0}% do total`,
+      icon: FileText,
+      gradient: 'from-orange-500 to-red-600',
+      bgGradient: 'from-orange-50 to-red-50'
+    }
+  ];
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="text-center space-y-4">
+        <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl shadow-lg">
+          <Sparkles className="h-6 w-6 text-white" />
+          <h1 className="text-xl font-bold text-white">Dashboard Analytics</h1>
+        </div>
+        <p className="text-gray-600 text-lg">
+          Análise completa dos seus plantões médicos
+        </p>
+      </div>
+
       {/* Filtros */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
+      <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <Filter className="h-5 w-5 text-blue-600" />
             Filtros de Período
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-4 items-end">
             <div className="space-y-2">
-              <Label>Período Rápido</Label>
+              <Label className="font-medium">Período Rápido</Label>
               <Select value={filtro.tipo} onValueChange={atualizarFiltro}>
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-40 h-11 border-2 border-gray-200 rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -130,20 +173,22 @@ export function Dashboard() {
             </div>
 
             <div className="space-y-2">
-              <Label>Data Início</Label>
+              <Label className="font-medium">Data Início</Label>
               <Input
                 type="date"
                 value={filtro.inicio}
                 onChange={(e) => setFiltro(prev => ({ ...prev, inicio: e.target.value }))}
+                className="h-11 border-2 border-gray-200 rounded-xl"
               />
             </div>
 
             <div className="space-y-2">
-              <Label>Data Fim</Label>
+              <Label className="font-medium">Data Fim</Label>
               <Input
                 type="date"
                 value={filtro.fim}
                 onChange={(e) => setFiltro(prev => ({ ...prev, fim: e.target.value }))}
+                className="h-11 border-2 border-gray-200 rounded-xl"
               />
             </div>
           </div>
@@ -151,96 +196,83 @@ export function Dashboard() {
       </Card>
 
       {/* Métricas Principais */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Recebido</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              R$ {metrics.totalRecebido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Líquido: R$ {metrics.valorLiquido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Horas Trabalhadas</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{metrics.totalHoras}h</div>
-            <p className="text-xs text-muted-foreground">
-              Média: {metrics.valorMedioHora.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} R$/h
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Plantões</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{metrics.totalPlantoes}</div>
-            <p className="text-xs text-muted-foreground">
-              Média: R$ {metrics.valorMedioPlantao.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Impostos Pagos</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              R$ {metrics.impostoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {metrics.totalRecebido > 0 ? ((metrics.impostoTotal / metrics.totalRecebido) * 100).toFixed(1) : 0}% do total
-            </p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {metricsCards.map((metric, index) => {
+          const Icon = metric.icon;
+          return (
+            <Card key={index} className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+              <div className={`absolute inset-0 bg-gradient-to-br ${metric.bgGradient} opacity-50`}></div>
+              <CardContent className="relative p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className={`p-3 rounded-xl bg-gradient-to-br ${metric.gradient} shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                    <Icon className="h-6 w-6 text-white" />
+                  </div>
+                  <TrendingUp className="h-5 w-5 text-gray-400 group-hover:text-green-500 transition-colors duration-300" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">{metric.title}</p>
+                  <p className="text-2xl font-bold text-gray-900 mb-1">{metric.value}</p>
+                  <p className="text-xs text-gray-500">{metric.subtitle}</p>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Gráficos */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Evolução Mensal */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Evolução de Ganhos Mensais</CardTitle>
+        <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-xl">Evolução de Ganhos Mensais</CardTitle>
+            <p className="text-gray-600">Acompanhe o crescimento dos seus rendimentos</p>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={320}>
               <AreaChart data={evolucaoMensal}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="mes" />
-                <YAxis />
+                <defs>
+                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.1}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                <XAxis dataKey="mes" stroke="#6B7280" />
+                <YAxis stroke="#6B7280" />
                 <Tooltip 
                   formatter={(value: number) => [
                     `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
                     'Valor'
                   ]}
+                  contentStyle={{
+                    backgroundColor: 'white',
+                    border: '1px solid #E5E7EB',
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
+                  }}
                 />
-                <Area type="monotone" dataKey="valor" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+                <Area 
+                  type="monotone" 
+                  dataKey="valor" 
+                  stroke="#3B82F6" 
+                  fillOpacity={1} 
+                  fill="url(#colorValue)"
+                  strokeWidth={3}
+                />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
         {/* Distribuição por Local */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Distribuição por Local</CardTitle>
+        <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-xl">Distribuição por Local</CardTitle>
+            <p className="text-gray-600">Percentual de ganhos por local de trabalho</p>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={320}>
               <PieChart>
                 <Pie
                   data={localStats}
@@ -248,7 +280,7 @@ export function Dashboard() {
                   cy="50%"
                   labelLine={false}
                   label={({ local, percentualTotal }) => `${local}: ${percentualTotal.toFixed(1)}%`}
-                  outerRadius={80}
+                  outerRadius={100}
                   fill="#8884d8"
                   dataKey="totalRecebido"
                 >
@@ -261,6 +293,12 @@ export function Dashboard() {
                     `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
                     'Total Recebido'
                   ]}
+                  contentStyle={{
+                    backgroundColor: 'white',
+                    border: '1px solid #E5E7EB',
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
+                  }}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -268,35 +306,43 @@ export function Dashboard() {
         </Card>
 
         {/* Ranking de Locais */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Ranking de Locais Mais Rentáveis</CardTitle>
+        <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-xl">Ranking de Locais Mais Rentáveis</CardTitle>
+            <p className="text-gray-600">Locais ordenados por receita total</p>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={320}>
               <BarChart data={localStats}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="local" />
-                <YAxis />
+                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                <XAxis dataKey="local" stroke="#6B7280" />
+                <YAxis stroke="#6B7280" />
                 <Tooltip 
                   formatter={(value: number) => [
                     `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
                     'Total Recebido'
                   ]}
+                  contentStyle={{
+                    backgroundColor: 'white',
+                    border: '1px solid #E5E7EB',
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
+                  }}
                 />
-                <Bar dataKey="totalRecebido" fill="#82ca9d" />
+                <Bar dataKey="totalRecebido" fill="#10B981" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
         {/* Status de Pagamentos */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Status dos Pagamentos</CardTitle>
+        <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-xl">Status dos Pagamentos</CardTitle>
+            <p className="text-gray-600">Distribuição dos status de pagamento</p>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={320}>
               <PieChart>
                 <Pie
                   data={statusData}
@@ -304,7 +350,7 @@ export function Dashboard() {
                   cy="50%"
                   labelLine={false}
                   label={({ name, value }) => `${name}: ${value}`}
-                  outerRadius={80}
+                  outerRadius={100}
                   fill="#8884d8"
                   dataKey="value"
                 >
@@ -312,7 +358,14 @@ export function Dashboard() {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip 
+                  contentStyle={{
+                    backgroundColor: 'white',
+                    border: '1px solid #E5E7EB',
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
+                  }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -320,39 +373,40 @@ export function Dashboard() {
       </div>
 
       {/* Estatísticas Detalhadas por Local */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin className="h-5 w-5" />
+      <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <MapPin className="h-5 w-5 text-blue-600" />
             Estatísticas Detalhadas por Local
           </CardTitle>
+          <p className="text-gray-600">Análise completa de performance por local</p>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
+            <table className="w-full">
               <thead>
-                <tr className="border-b">
-                  <th className="text-left p-2">Local</th>
-                  <th className="text-right p-2">Total Recebido</th>
-                  <th className="text-right p-2">Total Horas</th>
-                  <th className="text-right p-2">Plantões</th>
-                  <th className="text-right p-2">Valor/Hora</th>
-                  <th className="text-right p-2">% do Total</th>
+                <tr className="border-b-2 border-gray-200">
+                  <th className="text-left p-4 font-semibold text-gray-900">Local</th>
+                  <th className="text-right p-4 font-semibold text-gray-900">Total Recebido</th>
+                  <th className="text-right p-4 font-semibold text-gray-900">Total Horas</th>
+                  <th className="text-right p-4 font-semibold text-gray-900">Plantões</th>
+                  <th className="text-right p-4 font-semibold text-gray-900">Valor/Hora</th>
+                  <th className="text-right p-4 font-semibold text-gray-900">% do Total</th>
                 </tr>
               </thead>
               <tbody>
                 {localStats.map((local, index) => (
-                  <tr key={index} className="border-b">
-                    <td className="p-2 font-medium">{local.local}</td>
-                    <td className="text-right p-2">
+                  <tr key={index} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <td className="p-4 font-medium text-gray-900">{local.local}</td>
+                    <td className="text-right p-4 font-semibold text-emerald-600">
                       R$ {local.totalRecebido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </td>
-                    <td className="text-right p-2">{local.totalHoras}h</td>
-                    <td className="text-right p-2">{local.totalPlantoes}</td>
-                    <td className="text-right p-2">
+                    <td className="text-right p-4 text-gray-700">{local.totalHoras}h</td>
+                    <td className="text-right p-4 text-gray-700">{local.totalPlantoes}</td>
+                    <td className="text-right p-4 font-medium text-blue-600">
                       R$ {(local.totalRecebido / local.totalHoras).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </td>
-                    <td className="text-right p-2">{local.percentualTotal.toFixed(1)}%</td>
+                    <td className="text-right p-4 font-medium text-purple-600">{local.percentualTotal.toFixed(1)}%</td>
                   </tr>
                 ))}
               </tbody>

@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CalendarIcon, Plus, Calculator } from 'lucide-react';
+import { CalendarIcon, Plus, Calculator, MapPin, Clock, DollarSign, Percent } from 'lucide-react';
 import { usePlantao } from '@/contexts/PlantaoContext';
 import { Plantao } from '@/types/plantao';
 import { toast } from 'sonner';
@@ -34,7 +34,7 @@ export function PlantaoForm({ plantao, onSuccess }: PlantaoFormProps) {
   const [novoLocal, setNovoLocal] = useState('');
   const [mostrarNovoLocal, setMostrarNovoLocal] = useState(false);
   const [calcularImpostoAuto, setCalcularImpostoAuto] = useState(true);
-  const [percentualImposto, setPercentualImposto] = useState(11); // 11% padrão para MEI
+  const [percentualImposto, setPercentualImposto] = useState(11);
 
   const locaisExistentes = getUniqueLocais();
 
@@ -60,7 +60,6 @@ export function PlantaoForm({ plantao, onSuccess }: PlantaoFormProps) {
 
   const valorRecebido = watch('valorRecebido');
 
-  // Calcular imposto automaticamente
   React.useEffect(() => {
     if (calcularImpostoAuto && valorRecebido) {
       const impostoCalculado = (valorRecebido * percentualImposto) / 100;
@@ -104,156 +103,210 @@ export function PlantaoForm({ plantao, onSuccess }: PlantaoFormProps) {
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <CalendarIcon className="h-5 w-5" />
-          {plantao ? 'Editar Plantão' : 'Cadastrar Novo Plantão'}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* Local */}
-          <div className="space-y-2">
-            <Label htmlFor="local">Local do Plantão</Label>
-            {!mostrarNovoLocal ? (
-              <div className="flex gap-2">
-                <Select onValueChange={(value) => setValue('local', value)}>
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Selecione um local" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {locaisExistentes.map((local) => (
-                      <SelectItem key={local} value={local}>
-                        {local}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setMostrarNovoLocal(true)}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-            ) : (
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Digite o nome do novo local"
-                  value={novoLocal}
-                  onChange={(e) => setNovoLocal(e.target.value)}
-                  className="flex-1"
-                />
-                <Button type="button" onClick={adicionarNovoLocal}>
-                  Adicionar
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setMostrarNovoLocal(false)}
-                >
-                  Cancelar
-                </Button>
-              </div>
-            )}
-            {errors.local && (
-              <p className="text-sm text-red-500">{errors.local.message}</p>
-            )}
-          </div>
+    <div className="max-w-4xl mx-auto space-y-8">
+      {/* Header */}
+      <div className="text-center space-y-4">
+        <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl shadow-lg">
+          <CalendarIcon className="h-6 w-6 text-white" />
+          <h1 className="text-xl font-bold text-white">
+            {plantao ? 'Editar Plantão' : 'Cadastrar Novo Plantão'}
+          </h1>
+        </div>
+        <p className="text-gray-600 text-lg">
+          {plantao ? 'Atualize as informações do seu plantão' : 'Registre os detalhes do seu plantão médico'}
+        </p>
+      </div>
 
-          {/* Data */}
-          <div className="space-y-2">
-            <Label htmlFor="data">Data do Plantão</Label>
-            <Input
-              type="date"
-              {...register('data')}
-              className="w-full"
-            />
-            {errors.data && (
-              <p className="text-sm text-red-500">{errors.data.message}</p>
-            )}
-          </div>
-
-          {/* Horas e Valor */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="horasTrabalhadas">Horas Trabalhadas</Label>
-              <Input
-                type="number"
-                step="0.5"
-                {...register('horasTrabalhadas', { valueAsNumber: true })}
-                placeholder="Ex: 12"
-              />
-              {errors.horasTrabalhadas && (
-                <p className="text-sm text-red-500">{errors.horasTrabalhadas.message}</p>
+      <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-sm">
+        <CardContent className="p-8">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+            {/* Local */}
+            <div className="space-y-3">
+              <Label className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-blue-600" />
+                Local do Plantão
+              </Label>
+              {!mostrarNovoLocal ? (
+                <div className="flex gap-3">
+                  <Select onValueChange={(value) => setValue('local', value)}>
+                    <SelectTrigger className="flex-1 h-12 border-2 border-gray-200 rounded-xl focus:border-blue-500 transition-colors">
+                      <SelectValue placeholder="Selecione um local" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {locaisExistentes.map((local) => (
+                        <SelectItem key={local} value={local}>
+                          {local}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-12 px-4 border-2 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50 rounded-xl transition-all duration-300"
+                    onClick={() => setMostrarNovoLocal(true)}
+                  >
+                    <Plus className="h-5 w-5" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex gap-3">
+                  <Input
+                    placeholder="Digite o nome do novo local"
+                    value={novoLocal}
+                    onChange={(e) => setNovoLocal(e.target.value)}
+                    className="flex-1 h-12 border-2 border-gray-200 rounded-xl focus:border-blue-500"
+                  />
+                  <Button 
+                    type="button" 
+                    onClick={adicionarNovoLocal}
+                    className="h-12 px-6 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-xl shadow-lg"
+                  >
+                    Adicionar
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-12 px-4 rounded-xl"
+                    onClick={() => setMostrarNovoLocal(false)}
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              )}
+              {errors.local && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+                  {errors.local.message}
+                </p>
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="valorRecebido">Valor Recebido (R$)</Label>
+            {/* Data */}
+            <div className="space-y-3">
+              <Label className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                <CalendarIcon className="h-5 w-5 text-purple-600" />
+                Data do Plantão
+              </Label>
               <Input
-                type="number"
-                step="0.01"
-                {...register('valorRecebido', { valueAsNumber: true })}
-                placeholder="Ex: 1200.00"
+                type="date"
+                {...register('data')}
+                className="h-12 border-2 border-gray-200 rounded-xl focus:border-purple-500 transition-colors"
               />
-              {errors.valorRecebido && (
-                <p className="text-sm text-red-500">{errors.valorRecebido.message}</p>
+              {errors.data && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+                  {errors.data.message}
+                </p>
               )}
             </div>
-          </div>
 
-          {/* Imposto */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <Label>Cálculo do Imposto</Label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={calcularImpostoAuto}
-                  onChange={(e) => setCalcularImpostoAuto(e.target.checked)}
-                  className="rounded"
-                />
-                <span className="text-sm">Calcular automaticamente</span>
-              </div>
-            </div>
-
-            {calcularImpostoAuto && (
-              <div className="flex items-center gap-2">
-                <Calculator className="h-4 w-4" />
-                <Label htmlFor="percentualImposto">Percentual (%)</Label>
+            {/* Horas e Valor */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <Label className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-emerald-600" />
+                  Horas Trabalhadas
+                </Label>
                 <Input
                   type="number"
-                  step="0.1"
-                  value={percentualImposto}
-                  onChange={(e) => setPercentualImposto(Number(e.target.value))}
-                  className="w-20"
+                  step="0.5"
+                  {...register('horasTrabalhadas', { valueAsNumber: true })}
+                  placeholder="Ex: 12"
+                  className="h-12 border-2 border-gray-200 rounded-xl focus:border-emerald-500 transition-colors"
                 />
+                {errors.horasTrabalhadas && (
+                  <p className="text-sm text-red-500 flex items-center gap-1">
+                    <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+                    {errors.horasTrabalhadas.message}
+                  </p>
+                )}
               </div>
-            )}
 
-            <div className="space-y-2">
-              <Label htmlFor="imposto">Valor do Imposto (R$)</Label>
-              <Input
-                type="number"
-                step="0.01"
-                {...register('imposto', { valueAsNumber: true })}
-                placeholder="Ex: 132.00"
-                disabled={calcularImpostoAuto}
-              />
-              {errors.imposto && (
-                <p className="text-sm text-red-500">{errors.imposto.message}</p>
-              )}
+              <div className="space-y-3">
+                <Label className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                  <DollarSign className="h-5 w-5 text-green-600" />
+                  Valor Recebido (R$)
+                </Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  {...register('valorRecebido', { valueAsNumber: true })}
+                  placeholder="Ex: 1200.00"
+                  className="h-12 border-2 border-gray-200 rounded-xl focus:border-green-500 transition-colors"
+                />
+                {errors.valorRecebido && (
+                  <p className="text-sm text-red-500 flex items-center gap-1">
+                    <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+                    {errors.valorRecebido.message}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
 
-          <Button type="submit" className="w-full">
-            {plantao ? 'Atualizar Plantão' : 'Cadastrar Plantão'}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+            {/* Imposto */}
+            <div className="space-y-6 p-6 bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl border border-gray-200">
+              <div className="flex items-center justify-between">
+                <Label className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                  <Calculator className="h-5 w-5 text-orange-600" />
+                  Cálculo do Imposto
+                </Label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={calcularImpostoAuto}
+                    onChange={(e) => setCalcularImpostoAuto(e.target.checked)}
+                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700">Calcular automaticamente</span>
+                </div>
+              </div>
+
+              {calcularImpostoAuto && (
+                <div className="flex items-center gap-4 p-4 bg-white rounded-xl border border-gray-200">
+                  <Percent className="h-5 w-5 text-orange-600" />
+                  <Label className="font-medium text-gray-700">Percentual:</Label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    value={percentualImposto}
+                    onChange={(e) => setPercentualImposto(Number(e.target.value))}
+                    className="w-24 h-10 border-2 border-gray-200 rounded-lg focus:border-orange-500"
+                  />
+                  <span className="text-gray-600 font-medium">%</span>
+                </div>
+              )}
+
+              <div className="space-y-3">
+                <Label className="text-base font-semibold text-gray-900">
+                  Valor do Imposto (R$)
+                </Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  {...register('imposto', { valueAsNumber: true })}
+                  placeholder="Ex: 132.00"
+                  disabled={calcularImpostoAuto}
+                  className="h-12 border-2 border-gray-200 rounded-xl focus:border-orange-500 transition-colors disabled:bg-gray-100"
+                />
+                {errors.imposto && (
+                  <p className="text-sm text-red-500 flex items-center gap-1">
+                    <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+                    {errors.imposto.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <Button 
+              type="submit" 
+              className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              {plantao ? 'Atualizar Plantão' : 'Cadastrar Plantão'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
