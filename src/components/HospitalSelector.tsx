@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, MapPin } from 'lucide-react';
 import { usePlantao } from '@/contexts/PlantaoContext';
+import { toast } from 'sonner';
 
 interface HospitalSelectorProps {
   value: string;
@@ -23,9 +24,20 @@ export function HospitalSelector({ value, onChange, error }: HospitalSelectorPro
 
   const handleCustomSubmit = () => {
     if (customLocal.trim()) {
+      console.log('Adicionando local:', customLocal.trim()); // Debug
       onChange(customLocal.trim());
       setCustomLocal('');
       setShowCustomInput(false);
+      toast.success(`Local "${customLocal.trim()}" adicionado com sucesso!`);
+    } else {
+      toast.error('Digite um nome para o local');
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleCustomSubmit();
     }
   };
 
@@ -42,12 +54,14 @@ export function HospitalSelector({ value, onChange, error }: HospitalSelectorPro
             value={customLocal}
             onChange={(e) => setCustomLocal(e.target.value)}
             className="flex-1 h-12 border-2 border-gray-200 rounded-xl focus:border-blue-500"
-            onKeyPress={(e) => e.key === 'Enter' && handleCustomSubmit()}
+            onKeyPress={handleKeyPress}
+            autoFocus
           />
           <Button 
             type="button" 
             onClick={handleCustomSubmit}
-            className="h-12 px-6 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-xl shadow-lg"
+            disabled={!customLocal.trim()}
+            className="h-12 px-6 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Adicionar
           </Button>
@@ -55,11 +69,19 @@ export function HospitalSelector({ value, onChange, error }: HospitalSelectorPro
             type="button"
             variant="outline"
             className="h-12 px-4 rounded-xl"
-            onClick={() => setShowCustomInput(false)}
+            onClick={() => {
+              setShowCustomInput(false);
+              setCustomLocal('');
+            }}
           >
             Cancelar
           </Button>
         </div>
+        {customLocal.trim() && (
+          <p className="text-sm text-gray-600">
+            Será adicionado: <span className="font-medium text-blue-600">"{customLocal.trim()}"</span>
+          </p>
+        )}
       </div>
     );
   }
@@ -77,16 +99,13 @@ export function HospitalSelector({ value, onChange, error }: HospitalSelectorPro
             <SelectValue placeholder="Selecione ou crie um local..." />
           </SelectTrigger>
           <SelectContent>
-            {locaisExistentes.length > 0 && (
-              <>
-                {locaisExistentes.map((local) => (
-                  <SelectItem key={local} value={local}>
-                    {local}
-                  </SelectItem>
-                ))}
-              </>
-            )}
-            {locaisExistentes.length === 0 && (
+            {locaisExistentes.length > 0 ? (
+              locaisExistentes.map((local) => (
+                <SelectItem key={local} value={local}>
+                  {local}
+                </SelectItem>
+              ))
+            ) : (
               <SelectItem value="" disabled>
                 Nenhum local cadastrado ainda
               </SelectItem>
@@ -99,10 +118,18 @@ export function HospitalSelector({ value, onChange, error }: HospitalSelectorPro
           variant="outline"
           className="h-12 px-4 border-2 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50 rounded-xl transition-all duration-300"
           onClick={() => setShowCustomInput(true)}
+          title="Adicionar novo local"
         >
           <Plus className="h-5 w-5" />
         </Button>
       </div>
+
+      {value && (
+        <p className="text-sm text-green-600 flex items-center gap-1">
+          <span className="w-1 h-1 bg-green-500 rounded-full"></span>
+          Local selecionado: <span className="font-medium">{value}</span>
+        </p>
+      )}
 
       {error && (
         <p className="text-sm text-red-500 flex items-center gap-1">
