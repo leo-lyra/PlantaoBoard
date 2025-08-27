@@ -330,16 +330,6 @@ export function PlantaoList() {
                             </>
                           ) : (
                             <>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-8 w-8 p-0 border-gray-300 hover:border-blue-500 hover:bg-blue-50"
-                                onClick={() => iniciarEdicao(plantao)}
-                                title="Editar"
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              
                               {plantao.statusPagamento === 'À Receber' && (
                                 <Button
                                   size="sm"
@@ -351,6 +341,16 @@ export function PlantaoList() {
                                   Recebido
                                 </Button>
                               )}
+
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 w-8 p-0 border-gray-300 hover:border-blue-500 hover:bg-blue-50"
+                                onClick={() => iniciarEdicao(plantao)}
+                                title="Editar"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
                               
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
