@@ -7,11 +7,11 @@ import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CalendarIcon, Plus, Calculator, MapPin, Clock, DollarSign, Percent } from 'lucide-react';
+import { CalendarIcon, Calculator, Clock, DollarSign, Percent } from 'lucide-react';
 import { usePlantao } from '@/contexts/PlantaoContext';
 import { Plantao } from '@/types/plantao';
+import { HospitalSelector } from './HospitalSelector';
 import { toast } from 'sonner';
 
 const plantaoSchema = z.object({
@@ -30,13 +30,9 @@ interface PlantaoFormProps {
 }
 
 export function PlantaoForm({ plantao, onSuccess }: PlantaoFormProps) {
-  const { addPlantao, updatePlantao, getUniqueLocais } = usePlantao();
-  const [novoLocal, setNovoLocal] = useState('');
-  const [mostrarNovoLocal, setMostrarNovoLocal] = useState(false);
+  const { addPlantao, updatePlantao } = usePlantao();
   const [calcularImpostoAuto, setCalcularImpostoAuto] = useState(true);
   const [percentualImposto, setPercentualImposto] = useState(11);
-
-  const locaisExistentes = getUniqueLocais();
 
   const {
     register,
@@ -59,6 +55,7 @@ export function PlantaoForm({ plantao, onSuccess }: PlantaoFormProps) {
   });
 
   const valorRecebido = watch('valorRecebido');
+  const localValue = watch('local');
 
   React.useEffect(() => {
     if (calcularImpostoAuto && valorRecebido) {
@@ -68,16 +65,8 @@ export function PlantaoForm({ plantao, onSuccess }: PlantaoFormProps) {
   }, [valorRecebido, percentualImposto, calcularImpostoAuto, setValue]);
 
   const onSubmit = (data: PlantaoFormData) => {
-    const localFinal = mostrarNovoLocal ? novoLocal : data.local;
-    
-    if (!localFinal) {
-      toast.error('Por favor, selecione ou adicione um local');
-      return;
-    }
-
     const plantaoData = {
       ...data,
-      local: localFinal,
       statusPagamento: plantao?.statusPagamento || 'Pendente' as const,
       numeroNotaFiscal: plantao?.numeroNotaFiscal,
     };
@@ -87,19 +76,9 @@ export function PlantaoForm({ plantao, onSuccess }: PlantaoFormProps) {
     } else {
       addPlantao(plantaoData);
       reset();
-      setNovoLocal('');
-      setMostrarNovoLocal(false);
     }
 
     onSuccess?.();
-  };
-
-  const adicionarNovoLocal = () => {
-    if (novoLocal.trim()) {
-      setValue('local', novoLocal);
-      setMostrarNovoLocal(false);
-      toast.success('Novo local adicionado!');
-    }
   };
 
   return (
@@ -121,88 +100,32 @@ export function PlantaoForm({ plantao, onSuccess }: PlantaoFormProps) {
         <CardContent className="p-8">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
             {/* Local */}
-            <div className="space-y-3">
-              <Label className="text-base font-semibold text-gray-900 flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-blue-600" />
-                Local do Plantão
-              </Label>
-              {!mostrarNovoLocal ? (
-                <div className="flex gap-3">
-                  <Select onValueChange={(value) => setValue('local', value)}>
-                    <SelectTrigger className="flex-1 h-12 border-2 border-gray-200 rounded-xl focus:border-blue-500 transition-colors">
-                      <SelectValue placeholder="Selecione um local" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {locaisExistentes.map((local) => (
-                        <SelectItem key={local} value={local}>
-                          {local}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="h-12 px-4 border-2 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50 rounded-xl transition-all duration-300"
-                    onClick={() => setMostrarNovoLocal(true)}
-                  >
-                    <Plus className="h-5 w-5" />
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex gap-3">
-                  <Input
-                    placeholder="Digite o nome do novo local"
-                    value={novoLocal}
-                    onChange={(e) => setNovoLocal(e.target.value)}
-                    className="flex-1 h-12 border-2 border-gray-200 rounded-xl focus:border-blue-500"
-                  />
-                  <Button 
-                    type="button" 
-                    onClick={adicionarNovoLocal}
-                    className="h-12 px-6 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-xl shadow-lg"
-                  >
-                    Adicionar
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="h-12 px-4 rounded-xl"
-                    onClick={() => setMostrarNovoLocal(false)}
-                  >
-                    Cancelar
-                  </Button>
-                </div>
-              )}
-              {errors.local && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
-                  <span className="w-1 h-1 bg-red-500 rounded-full"></span>
-                  {errors.local.message}
-                </p>
-              )}
-            </div>
+            <HospitalSelector
+              value={localValue || ''}
+              onChange={(value) => setValue('local', value)}
+              error={errors.local?.message}
+            />
 
-            {/* Data */}
-            <div className="space-y-3">
-              <Label className="text-base font-semibold text-gray-900 flex items-center gap-2">
-                <CalendarIcon className="h-5 w-5 text-purple-600" />
-                Data do Plantão
-              </Label>
-              <Input
-                type="date"
-                {...register('data')}
-                className="h-12 border-2 border-gray-200 rounded-xl focus:border-purple-500 transition-colors"
-              />
-              {errors.data && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
-                  <span className="w-1 h-1 bg-red-500 rounded-full"></span>
-                  {errors.data.message}
-                </p>
-              )}
-            </div>
+            {/* Data e Horas */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-3">
+                <Label className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                  <CalendarIcon className="h-5 w-5 text-purple-600" />
+                  Data do Plantão
+                </Label>
+                <Input
+                  type="date"
+                  {...register('data')}
+                  className="h-12 border-2 border-gray-200 rounded-xl focus:border-purple-500 transition-colors"
+                />
+                {errors.data && (
+                  <p className="text-sm text-red-500 flex items-center gap-1">
+                    <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+                    {errors.data.message}
+                  </p>
+                )}
+              </div>
 
-            {/* Horas e Valor */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-3">
                 <Label className="text-base font-semibold text-gray-900 flex items-center gap-2">
                   <Clock className="h-5 w-5 text-emerald-600" />

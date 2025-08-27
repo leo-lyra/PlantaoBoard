@@ -8,6 +8,12 @@ export interface Plantao {
   statusPagamento: 'Pago' | 'Pendente' | 'Atrasado';
   numeroNotaFiscal?: string;
   anexo?: string;
+  // Coordenadas para futuro mapa
+  latitude?: number;
+  longitude?: number;
+  cidade?: string;
+  estado?: string;
+  tipoLocal?: 'Hospital' | 'UBS' | 'UPA' | 'Pronto Socorro' | 'Hospital Universitário' | 'Outro';
   createdAt: string;
   updatedAt: string;
 }
@@ -29,6 +35,10 @@ export interface LocalStats {
   totalPlantoes: number;
   valorMedio: number;
   percentualTotal: number;
+  cidade?: string;
+  estado?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface PeriodFilter {

@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Plantao, DashboardMetrics, LocalStats, PeriodFilter } from '@/types/plantao';
+import { hospitaisBrasil } from '@/data/hospitais';
 import { toast } from 'sonner';
 
 interface PlantaoContextType {
@@ -39,11 +40,22 @@ export function PlantaoProvider({ children }: { children: React.ReactNode }) {
   }, [plantoes]);
 
   const addPlantao = (plantaoData: Omit<Plantao, 'id' | 'createdAt' | 'updatedAt'>) => {
+    // Buscar dados geográficos do hospital se existir na base
+    const hospitalInfo = hospitaisBrasil.find(h => h.nome === plantaoData.local);
+    
     const newPlantao: Plantao = {
       ...plantaoData,
       id: Date.now().toString(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      // Adicionar dados geográficos se disponível
+      ...(hospitalInfo && {
+        latitude: hospitalInfo.lat,
+        longitude: hospitalInfo.lng,
+        cidade: hospitalInfo.cidade,
+        estado: hospitalInfo.estado,
+        tipoLocal: hospitalInfo.tipo,
+      }),
     };
     
     setPlantoes(prev => [...prev, newPlantao]);
@@ -52,14 +64,29 @@ export function PlantaoProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updatePlantao = (id: string, plantaoData: Partial<Plantao>) => {
+    // Se o local foi alterado, buscar novos dados geográficos
+    let geoData = {};
+    if (plantaoData.local) {
+      const hospitalInfo = hospitaisBrasil.find(h => h.nome === plantaoData.local);
+      if (hospitalInfo) {
+        geoData = {
+          latitude: hospitalInfo.lat,
+          longitude: hospitalInfo.lng,
+          cidade: hospitalInfo.cidade,
+          estado: hospitalInfo.estado,
+          tipoLocal: hospitalInfo.tipo,
+        };
+      }
+    }
+
     setPlantoes(prev => prev.map(plantao => 
       plantao.id === id 
-        ? { ...plantao, ...plantaoData, updatedAt: new Date().toISOString() }
+        ? { ...plantao, ...plantaoData, ...geoData, updatedAt: new Date().toISOString() }
         : plantao
     ));
     setFilteredPlantoes(prev => prev.map(plantao => 
       plantao.id === id 
-        ? { ...plantao, ...plantaoData, updatedAt: new Date().toISOString() }
+        ? { ...plantao, ...plantaoData, ...geoData, updatedAt: new Date().toISOString() }
         : plantao
     ));
     toast.success('Plantão atualizado com sucesso!');
@@ -110,6 +137,10 @@ export function PlantaoProvider({ children }: { children: React.ReactNode }) {
         totalPlantoes: 0,
         valorMedio: 0,
         percentualTotal: 0,
+        cidade: plantao.cidade,
+        estado: plantao.estado,
+        latitude: plantao.latitude,
+        longitude: plantao.longitude,
       };
 
       existing.totalRecebido += plantao.valorRecebido;
