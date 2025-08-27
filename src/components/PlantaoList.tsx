@@ -190,7 +190,7 @@ export function PlantaoList() {
                     <th className="text-right p-4 font-semibold text-gray-900 min-w-[130px]">Valor Líquido</th>
                     <th className="text-right p-4 font-semibold text-gray-900 min-w-[120px]">Valor/Hora</th>
                     <th className="text-center p-4 font-semibold text-gray-900 min-w-[120px]">Status</th>
-                    <th className="text-center p-4 font-semibold text-gray-900 min-w-[140px]">Ações</th>
+                    <th className="text-center p-4 font-semibold text-gray-900 min-w-[180px]">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -300,26 +300,14 @@ export function PlantaoList() {
 
                       {/* Status */}
                       <td className="p-3 text-center">
-                        <div className="flex flex-col gap-2">
-                          <Badge className={`${getStatusColor(plantao.statusPagamento)} border font-medium`}>
-                            {plantao.statusPagamento}
-                          </Badge>
-                          {plantao.statusPagamento === 'À Receber' && (
-                            <Button
-                              size="sm"
-                              className="h-7 px-3 bg-green-600 hover:bg-green-700 text-white text-xs rounded-lg"
-                              onClick={() => alterarStatus(plantao.id, 'Recebido')}
-                            >
-                              <CheckCircle className="h-3 w-3 mr-1" />
-                              Recebido
-                            </Button>
-                          )}
-                        </div>
+                        <Badge className={`${getStatusColor(plantao.statusPagamento)} border font-medium`}>
+                          {plantao.statusPagamento}
+                        </Badge>
                       </td>
 
                       {/* Ações */}
                       <td className="p-3">
-                        <div className="flex items-center justify-center gap-2">
+                        <div className="flex items-center justify-center gap-2 flex-wrap">
                           {editandoId === plantao.id ? (
                             <>
                               <Button
@@ -348,6 +336,18 @@ export function PlantaoList() {
                               >
                                 <Edit className="h-4 w-4" />
                               </Button>
+                              
+                              {plantao.statusPagamento === 'À Receber' && (
+                                <Button
+                                  size="sm"
+                                  className="h-8 px-3 bg-green-600 hover:bg-green-700 text-white text-xs rounded-lg"
+                                  onClick={() => alterarStatus(plantao.id, 'Recebido')}
+                                >
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                  Recebido
+                                </Button>
+                              )}
+                              
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                   <Button 
