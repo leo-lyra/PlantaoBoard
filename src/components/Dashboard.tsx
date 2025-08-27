@@ -40,6 +40,17 @@ export function Dashboard() {
   const metrics = getDashboardMetrics(plantoesFiltrados);
   const localStats = getLocalStats(plantoesFiltrados);
 
+  // Calcular total à receber
+  const totalAReceber = useMemo(() => {
+    return plantoesFiltrados
+      .filter(plantao => plantao.statusPagamento === 'À Receber')
+      .reduce((sum, plantao) => sum + plantao.valorRecebido, 0);
+  }, [plantoesFiltrados]);
+
+  const quantidadeAReceber = useMemo(() => {
+    return plantoesFiltrados.filter(plantao => plantao.statusPagamento === 'À Receber').length;
+  }, [plantoesFiltrados]);
+
   const evolucaoMensal = useMemo(() => {
     const meses = new Map();
     
@@ -106,6 +117,14 @@ export function Dashboard() {
       icon: DollarSign,
       gradient: 'from-emerald-500 to-teal-600',
       bgGradient: 'from-emerald-50 to-teal-50'
+    },
+    {
+      title: 'Total À Receber',
+      value: `R$ ${totalAReceber.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      subtitle: `${quantidadeAReceber} plantão${quantidadeAReceber !== 1 ? 'ões' : ''} pendente${quantidadeAReceber !== 1 ? 's' : ''}`,
+      icon: AlertCircle,
+      gradient: 'from-yellow-500 to-orange-600',
+      bgGradient: 'from-yellow-50 to-orange-50'
     },
     {
       title: 'Horas Trabalhadas',
@@ -196,7 +215,7 @@ export function Dashboard() {
       </Card>
 
       {/* Métricas Principais */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         {metricsCards.map((metric, index) => {
           const Icon = metric.icon;
           return (
