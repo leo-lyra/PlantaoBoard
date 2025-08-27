@@ -14,6 +14,7 @@ interface PlantaoContextType {
   getDashboardMetrics: (plantoes: Plantao[]) => DashboardMetrics;
   getLocalStats: (plantoes: Plantao[]) => LocalStats[];
   getUniqueLocais: () => string[];
+  addLocalTemporario: (local: string) => void;
   filteredPlantoes: Plantao[];
   setFilteredPlantoes: (plantoes: Plantao[]) => void;
 }
@@ -23,6 +24,7 @@ const PlantaoContext = createContext<PlantaoContextType | undefined>(undefined);
 export function PlantaoProvider({ children }: { children: React.ReactNode }) {
   const [plantoes, setPlantoes] = useState<Plantao[]>([]);
   const [filteredPlantoes, setFilteredPlantoes] = useState<Plantao[]>([]);
+  const [locaisTemporarios, setLocaisTemporarios] = useState<string[]>([]);
 
   // Carregar dados do localStorage
   useEffect(() => {
@@ -32,12 +34,23 @@ export function PlantaoProvider({ children }: { children: React.ReactNode }) {
       setPlantoes(parsed);
       setFilteredPlantoes(parsed);
     }
+
+    // Carregar locais temporários
+    const savedLocaisTemporarios = localStorage.getItem('locais-temporarios');
+    if (savedLocaisTemporarios) {
+      setLocaisTemporarios(JSON.parse(savedLocaisTemporarios));
+    }
   }, []);
 
   // Salvar no localStorage sempre que plantoes mudar
   useEffect(() => {
     localStorage.setItem('plantoes-medicos', JSON.stringify(plantoes));
   }, [plantoes]);
+
+  // Salvar locais temporários no localStorage
+  useEffect(() => {
+    localStorage.setItem('locais-temporarios', JSON.stringify(locaisTemporarios));
+  }, [locaisTemporarios]);
 
   const addPlantao = (plantaoData: Omit<Plantao, 'id' | 'createdAt' | 'updatedAt'>) => {
     // Buscar dados geográficos do hospital se existir na base
@@ -156,8 +169,18 @@ export function PlantaoProvider({ children }: { children: React.ReactNode }) {
   };
 
   const getUniqueLocais = (): string[] => {
-    const locais = new Set(plantoes.map(p => p.local));
-    return Array.from(locais).sort();
+    // Combinar locais dos plantões + locais temporários
+    const locaisDosPlantoes = new Set(plantoes.map(p => p.local));
+    const todosLocais = new Set([...Array.from(locaisDosPlantoes), ...locaisTemporarios]);
+    return Array.from(todosLocais).filter(local => local && local.trim().length > 0).sort();
+  };
+
+  const addLocalTemporario = (local: string) => {
+    const localTrimmed = local.trim();
+    if (localTrimmed && !locaisTemporarios.includes(localTrimmed)) {
+      setLocaisTemporarios(prev => [...prev, localTrimmed]);
+      console.log('Local temporário adicionado:', localTrimmed);
+    }
   };
 
   return (
@@ -170,6 +193,7 @@ export function PlantaoProvider({ children }: { children: React.ReactNode }) {
       getDashboardMetrics,
       getLocalStats,
       getUniqueLocais,
+      addLocalTemporario,
       filteredPlantoes,
       setFilteredPlantoes,
     }}>

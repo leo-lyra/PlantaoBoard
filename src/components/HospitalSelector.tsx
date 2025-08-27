@@ -18,17 +18,25 @@ interface HospitalSelectorProps {
 export function HospitalSelector({ value, onChange, error }: HospitalSelectorProps) {
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customLocal, setCustomLocal] = useState('');
-  const { getUniqueLocais } = usePlantao();
+  const { getUniqueLocais, addLocalTemporario } = usePlantao();
 
   const locaisExistentes = getUniqueLocais();
 
   const handleCustomSubmit = () => {
     if (customLocal.trim()) {
-      console.log('Adicionando local:', customLocal.trim()); // Debug
-      onChange(customLocal.trim());
+      const novoLocal = customLocal.trim();
+      
+      // Adicionar à lista de locais temporários
+      addLocalTemporario(novoLocal);
+      
+      // Definir como valor selecionado
+      onChange(novoLocal);
+      
+      // Limpar e fechar
       setCustomLocal('');
       setShowCustomInput(false);
-      toast.success(`Local "${customLocal.trim()}" adicionado com sucesso!`);
+      
+      toast.success(`Local "${novoLocal}" adicionado à lista!`);
     } else {
       toast.error('Digite um nome para o local');
     }
