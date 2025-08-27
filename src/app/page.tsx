@@ -1,15 +1,45 @@
-import { MadeWithLasy } from "@/components/made-with-lasy";
+"use client";
+
+import React, { useState } from 'react';
+import { Navigation } from '@/components/Navigation';
+import { Dashboard } from '@/components/Dashboard';
+import { PlantaoForm } from '@/components/PlantaoForm';
+import { PlantaoList } from '@/components/PlantaoList';
+import { PlantaoProvider } from '@/contexts/PlantaoContext';
+import { Toaster } from '@/components/ui/sonner';
 
 export default function Home() {
+  const [activeTab, setActiveTab] = useState('dashboard');
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return <Dashboard />;
+      case 'cadastrar':
+        return <PlantaoForm />;
+      case 'listar':
+        return <PlantaoList />;
+      default:
+        return <Dashboard />;
+    }
+  };
+
   return (
-    <div className="grid grid-rows-[1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-1 items-center sm:items-start">
-        <h1 className="text-4xl font-bold mb-4">Bem Vindo ao Seu Novo App</h1>
-        <p className="text-xl text-gray-600">
-          Hora de transformar ideias em realidade!
-        </p>
-      </main>
-      <MadeWithLasy />
-    </div>
+    <PlantaoProvider>
+      <div className="min-h-screen bg-gray-50">
+        <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+        
+        {/* Main Content */}
+        <div className="md:pl-64">
+          <main className="p-4 md:p-8">
+            <div className="max-w-7xl mx-auto">
+              {renderContent()}
+            </div>
+          </main>
+        </div>
+        
+        <Toaster />
+      </div>
+    </PlantaoProvider>
   );
 }
