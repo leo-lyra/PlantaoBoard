@@ -20,8 +20,6 @@ const plantaoSchema = z.object({
   horasTrabalhadas: z.number().min(0.1, 'Horas trabalhadas deve ser maior que 0'),
   valorRecebido: z.number().min(0, 'Valor deve ser maior ou igual a 0'),
   imposto: z.number().min(0, 'Imposto deve ser maior ou igual a 0'),
-  statusPagamento: z.enum(['Pago', 'Pendente', 'Atrasado']),
-  numeroNotaFiscal: z.string().optional(),
 });
 
 type PlantaoFormData = z.infer<typeof plantaoSchema>;
@@ -55,10 +53,7 @@ export function PlantaoForm({ plantao, onSuccess }: PlantaoFormProps) {
       horasTrabalhadas: plantao.horasTrabalhadas,
       valorRecebido: plantao.valorRecebido,
       imposto: plantao.imposto,
-      statusPagamento: plantao.statusPagamento,
-      numeroNotaFiscal: plantao.numeroNotaFiscal || '',
     } : {
-      statusPagamento: 'Pendente',
       data: new Date().toISOString().split('T')[0],
     }
   });
@@ -84,6 +79,8 @@ export function PlantaoForm({ plantao, onSuccess }: PlantaoFormProps) {
     const plantaoData = {
       ...data,
       local: localFinal,
+      statusPagamento: plantao?.statusPagamento || 'Pendente' as const,
+      numeroNotaFiscal: plantao?.numeroNotaFiscal,
     };
 
     if (plantao) {
@@ -249,34 +246,6 @@ export function PlantaoForm({ plantao, onSuccess }: PlantaoFormProps) {
               {errors.imposto && (
                 <p className="text-sm text-red-500">{errors.imposto.message}</p>
               )}
-            </div>
-          </div>
-
-          {/* Status e NF */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="statusPagamento">Status do Pagamento</Label>
-              <Select onValueChange={(value) => setValue('statusPagamento', value as any)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Pago">Pago</SelectItem>
-                  <SelectItem value="Pendente">Pendente</SelectItem>
-                  <SelectItem value="Atrasado">Atrasado</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.statusPagamento && (
-                <p className="text-sm text-red-500">{errors.statusPagamento.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="numeroNotaFiscal">Número da Nota Fiscal (Opcional)</Label>
-              <Input
-                {...register('numeroNotaFiscal')}
-                placeholder="Ex: 001234"
-              />
             </div>
           </div>
 
