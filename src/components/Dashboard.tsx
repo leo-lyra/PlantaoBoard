@@ -16,7 +16,6 @@ import {
 } from 'lucide-react';
 import { usePlantao } from '@/contexts/PlantaoContext';
 import { PeriodFilter } from '@/types/plantao';
-import { MapaPlantoes } from './MapaPlantoes';
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'];
 
@@ -220,9 +219,6 @@ export function Dashboard() {
           );
         })}
       </div>
-
-      {/* Mapa dos Plantões */}
-      <MapaPlantoes />
 
       {/* Gráficos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
