@@ -8,7 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Stethoscope, Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { toast } from 'sonner';
 
 export default function LoginPage() {
@@ -17,31 +16,52 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const supabase = createClientComponentClient();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      // Simular autenticação
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
-      if (error) {
-        toast.error('Erro ao fazer login', {
-          description: error.message === 'Invalid login credentials' 
-            ? 'Email ou senha incorretos' 
-            : error.message
-        });
+      // Verificar credenciais de teste
+      if (email === 'teste@plantaomed.com' && password === 'teste123') {
+        const testUser = {
+          id: 'test-user',
+          name: 'Dr. Teste Silva',
+          email: 'teste@plantaomed.com',
+          subscription_status: 'trial',
+          trial_ends_at: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+          created_at: new Date().toISOString(),
+          last_login: new Date().toISOString(),
+          total_plantoes: 0,
+          total_revenue: 0
+        };
+
+        localStorage.setItem('user-session', JSON.stringify(testUser));
+        toast.success('Login realizado com sucesso!');
+        router.push('/app');
         return;
       }
 
-      if (data.user) {
-        toast.success('Login realizado com sucesso!');
-        router.push('/app');
-      }
+      // Para outros emails, simular login bem-sucedido
+      const userData = {
+        id: Date.now().toString(),
+        name: email.split('@')[0],
+        email: email,
+        subscription_status: 'trial',
+        trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        created_at: new Date().toISOString(),
+        last_login: new Date().toISOString(),
+        total_plantoes: 0,
+        total_revenue: 0
+      };
+
+      localStorage.setItem('user-session', JSON.stringify(userData));
+      toast.success('Login realizado com sucesso!');
+      router.push('/app');
+      
     } catch (error) {
       toast.error('Erro inesperado', {
         description: 'Tente novamente em alguns instantes'
@@ -153,14 +173,13 @@ export default function LoginPage() {
           </CardContent>
         </Card>
 
-        {/* Footer */}
-        <div className="text-center mt-8 text-sm text-gray-500">
-          <p>Ao fazer login, você concorda com nossos</p>
-          <p>
-            <Link href="/terms" className="hover:text-gray-700">Termos de Uso</Link>
-            {' e '}
-            <Link href="/privacy" className="hover:text-gray-700">Política de Privacidade</Link>
-          </p>
+        {/* Credenciais de Teste */}
+        <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
+          <h3 className="font-semibold text-blue-800 mb-2">Credenciais de Teste:</h3>
+          <div className="text-sm text-blue-700 space-y-1">
+            <p><strong>Email:</strong> teste@plantaomed.com</p>
+            <p><strong>Senha:</strong> teste123</p>
+          </div>
         </div>
       </div>
     </div>

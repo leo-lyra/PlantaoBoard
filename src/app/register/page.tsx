@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { toast } from 'sonner';
 
 export default function RegisterPage() {
@@ -28,7 +27,6 @@ export default function RegisterPage() {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const supabase = createClientComponentClient();
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -55,31 +53,29 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signUp({
+      // Simular cadastro bem-sucedido
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Salvar dados do usuário localmente
+      const newUser = {
+        id: Date.now().toString(),
+        name: formData.name,
         email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            name: formData.name,
-            trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 dias
-            subscription_status: 'trial'
-          }
-        }
+        subscription_status: 'trial',
+        trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        created_at: new Date().toISOString(),
+        last_login: new Date().toISOString(),
+        total_plantoes: 0,
+        total_revenue: 0
+      };
+
+      localStorage.setItem('user-session', JSON.stringify(newUser));
+      
+      toast.success('Conta criada com sucesso!', {
+        description: 'Seu trial de 7 dias começou agora'
       });
-
-      if (error) {
-        toast.error('Erro ao criar conta', {
-          description: error.message
-        });
-        return;
-      }
-
-      if (data.user) {
-        toast.success('Conta criada com sucesso!', {
-          description: 'Seu trial de 7 dias começou agora'
-        });
-        router.push('/app');
-      }
+      
+      router.push('/app');
     } catch (error) {
       toast.error('Erro inesperado', {
         description: 'Tente novamente em alguns instantes'

@@ -9,15 +9,29 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { 
   Users, DollarSign, TrendingUp, Clock, Shield, LogOut,
   Search, Filter, Eye, Edit, Trash2, Crown, AlertCircle,
-  BarChart3, Calendar, MapPin, Stethoscope
+  BarChart3, Calendar, MapPin, Stethoscope, UserPlus
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { mockUsers, getDashboardStats, type MockUser } from '@/lib/mock-data';
 import { toast } from 'sonner';
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  subscription_status: 'trial' | 'active' | 'expired' | 'cancelled';
+  subscription_plan: 'mensal' | 'anual' | null;
+  trial_ends_at: string;
+  created_at: string;
+  last_login: string;
+  total_plantoes: number;
+  total_revenue: number;
+  city?: string;
+  specialty?: string;
+}
+
 export default function AdminDashboard() {
-  const [users, setUsers] = useState<MockUser[]>(mockUsers);
-  const [filteredUsers, setFilteredUsers] = useState<MockUser[]>(mockUsers);
+  const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
@@ -31,8 +45,9 @@ export default function AdminDashboard() {
       return;
     }
 
-    // Simular carregamento
-    setTimeout(() => setIsLoading(false), 1000);
+    // Carregar usuários do localStorage
+    loadUsers();
+    setIsLoading(false);
   }, [router]);
 
   useEffect(() => {
@@ -43,7 +58,7 @@ export default function AdminDashboard() {
       filtered = filtered.filter(user => 
         user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.specialty.toLowerCase().includes(searchTerm.toLowerCase())
+        (user.specialty && user.specialty.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 
@@ -53,6 +68,90 @@ export default function AdminDashboard() {
 
     setFilteredUsers(filtered);
   }, [users, searchTerm, statusFilter]);
+
+  const loadUsers = () => {
+    // Carregar usuários reais do localStorage
+    const realUsers: User[] = [];
+    
+    // Verificar se há usuários cadastrados
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('user-session')) {
+        try {
+          const userData = JSON.parse(localStorage.getItem(key) || '');
+          if (userData && userData.email) {
+            realUsers.push({
+              id: userData.id || key,
+              name: userData.name || 'Usuário',
+              email: userData.email,
+              subscription_status: userData.subscription_status || 'trial',
+              subscription_plan: userData.subscription_plan || null,
+              trial_ends_at: userData.trial_ends_at || new Date().toISOString(),
+              created_at: userData.created_at || new Date().toISOString(),
+              last_login: userData.last_login || new Date().toISOString(),
+              total_plantoes: userData.total_plantoes || 0,
+              total_revenue: userData.total_revenue || 0,
+              city: userData.city || 'Não informado',
+              specialty: userData.specialty || 'Não informado'
+            });
+          }
+        } catch (error) {
+          console.error('Erro ao carregar usuário:', error);
+        }
+      }
+    }
+
+    // Adicionar usuários de exemplo se não houver usuários reais
+    if (realUsers.length === 0) {
+      const mockUsers: User[] = [
+        {
+          id: '1',
+          name: 'Dr. Carlos Silva',
+          email: 'carlos.silva@email.com',
+          subscription_status: 'active',
+          subscription_plan: 'anual',
+          trial_ends_at: '2024-12-31T23:59:59Z',
+          created_at: '2024-01-15T10:30:00Z',
+          last_login: '2024-12-20T14:22:00Z',
+          total_plantoes: 45,
+          total_revenue: 54000,
+          city: 'São Paulo',
+          specialty: 'Cardiologia'
+        },
+        {
+          id: '2',
+          name: 'Dra. Ana Costa',
+          email: 'ana.costa@email.com',
+          subscription_status: 'active',
+          subscription_plan: 'mensal',
+          trial_ends_at: '2024-12-31T23:59:59Z',
+          created_at: '2024-02-20T09:15:00Z',
+          last_login: '2024-12-20T16:45:00Z',
+          total_plantoes: 32,
+          total_revenue: 38400,
+          city: 'Rio de Janeiro',
+          specialty: 'Pediatria'
+        },
+        {
+          id: '3',
+          name: 'Dr. Roberto Lima',
+          email: 'roberto.lima@email.com',
+          subscription_status: 'trial',
+          subscription_plan: null,
+          trial_ends_at: '2024-12-25T23:59:59Z',
+          created_at: '2024-12-18T11:20:00Z',
+          last_login: '2024-12-20T08:30:00Z',
+          total_plantoes: 3,
+          total_revenue: 3600,
+          city: 'Belo Horizonte',
+          specialty: 'Ortopedia'
+        }
+      ];
+      setUsers(mockUsers);
+    } else {
+      setUsers(realUsers);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('admin-session');
@@ -80,7 +179,17 @@ export default function AdminDashboard() {
     }
   };
 
-  const stats = getDashboardStats();
+  const stats = {
+    totalUsers: users.length,
+    activeUsers: users.filter(u => u.subscription_status === 'active').length,
+    trialUsers: users.filter(u => u.subscription_status === 'trial').length,
+    expiredUsers: users.filter(u => u.subscription_status === 'expired').length,
+    totalRevenue: users.reduce((sum, u) => sum + u.total_revenue, 0),
+    monthlyRevenue: users
+      .filter(u => u.subscription_status === 'active')
+      .reduce((sum, u) => sum + (u.subscription_plan === 'mensal' ? 9.90 : 7.92), 0),
+    conversionRate: users.length > 0 ? (users.filter(u => u.subscription_status === 'active').length / users.length) * 100 : 0
+  };
 
   if (isLoading) {
     return (
@@ -243,6 +352,14 @@ export default function AdminDashboard() {
               >
                 Limpar
               </Button>
+
+              <Button 
+                className="h-11 px-6 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-xl"
+                onClick={loadUsers}
+              >
+                <UserPlus className="h-4 w-4 mr-2" />
+                Atualizar
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -266,7 +383,7 @@ export default function AdminDashboard() {
                     <th className="text-center p-4 font-semibold text-gray-900">Plantões</th>
                     <th className="text-right p-4 font-semibold text-gray-900">Receita</th>
                     <th className="text-center p-4 font-semibold text-gray-900">Cadastro</th>
-                    <th className="text-center p-4 font-semibold text-gray-900">Ações</th>
+                    <th className="text-center p-4 font-semibold text-gray-900">Último Login</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -317,18 +434,10 @@ export default function AdminDashboard() {
                         </span>
                       </td>
 
-                      <td className="p-4">
-                        <div className="flex items-center justify-center gap-2">
-                          <Button size="sm" variant="outline" className="h-8 w-8 p-0">
-                            <Eye className="h-4  w-4" />
-                          </Button>
-                          <Button size="sm" variant="outline" className="h-8 w-8 p-0">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button size="sm" variant="outline" className="h-8 w-8 p-0 text-red-600 hover:bg-red-50">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                      <td className="p-4 text-center">
+                        <span className="text-sm text-gray-600">
+                          {new Date(user.last_login).toLocaleDateString('pt-BR')}
+                        </span>
                       </td>
                     </tr>
                   ))}
