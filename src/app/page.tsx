@@ -49,6 +49,7 @@ export default function Home() {
               border: '1px solid #e5e7eb',
               borderRadius: '12px',
               boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+              color: '#1f2937',
             },
           }}
         />
