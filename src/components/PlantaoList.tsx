@@ -190,7 +190,7 @@ export function PlantaoList() {
                     <th className="text-right p-4 font-semibold text-gray-900 min-w-[130px]">Valor Líquido</th>
                     <th className="text-right p-4 font-semibold text-gray-900 min-w-[120px]">Valor/Hora</th>
                     <th className="text-center p-4 font-semibold text-gray-900 min-w-[120px]">Status</th>
-                    <th className="text-center p-4 font-semibold text-gray-900 min-w-[180px]">Ações</th>
+                    <th className="text-center p-4 font-semibold text-gray-900 min-w-[220px]">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -307,13 +307,14 @@ export function PlantaoList() {
 
                       {/* Ações */}
                       <td className="p-3">
-                        <div className="flex items-center justify-center gap-2 flex-wrap">
+                        <div className="flex items-center justify-center gap-2">
                           {editandoId === plantao.id ? (
                             <>
                               <Button
                                 size="sm"
                                 className="h-8 w-8 p-0 bg-green-600 hover:bg-green-700"
                                 onClick={() => salvarEdicao(plantao.id)}
+                                title="Salvar"
                               >
                                 <Save className="h-4 w-4" />
                               </Button>
@@ -322,6 +323,7 @@ export function PlantaoList() {
                                 variant="outline"
                                 className="h-8 w-8 p-0 border-gray-300 hover:border-red-500 hover:bg-red-50"
                                 onClick={cancelarEdicao}
+                                title="Cancelar"
                               >
                                 <X className="h-4 w-4" />
                               </Button>
@@ -333,6 +335,7 @@ export function PlantaoList() {
                                 variant="outline"
                                 className="h-8 w-8 p-0 border-gray-300 hover:border-blue-500 hover:bg-blue-50"
                                 onClick={() => iniciarEdicao(plantao)}
+                                title="Editar"
                               >
                                 <Edit className="h-4 w-4" />
                               </Button>
@@ -340,8 +343,9 @@ export function PlantaoList() {
                               {plantao.statusPagamento === 'À Receber' && (
                                 <Button
                                   size="sm"
-                                  className="h-8 px-3 bg-green-600 hover:bg-green-700 text-white text-xs rounded-lg"
+                                  className="h-8 px-2 bg-green-600 hover:bg-green-700 text-white text-xs rounded-lg whitespace-nowrap"
                                   onClick={() => alterarStatus(plantao.id, 'Recebido')}
+                                  title="Marcar como Recebido"
                                 >
                                   <CheckCircle className="h-3 w-3 mr-1" />
                                   Recebido
@@ -354,6 +358,7 @@ export function PlantaoList() {
                                     size="sm" 
                                     variant="outline"
                                     className="h-8 w-8 p-0 border-gray-300 hover:border-red-500 hover:bg-red-50"
+                                    title="Excluir"
                                   >
                                     <Trash2 className="h-4 w-4" />
                                   </Button>
