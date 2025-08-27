@@ -11,8 +11,8 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('teste@plantaomed.com');
+  const [password, setPassword] = useState('teste123');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -22,33 +22,15 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
+      console.log('Tentando fazer login com:', email, password);
+      
       // Simular autenticação
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Verificar credenciais de teste
-      if (email === 'teste@plantaomed.com' && password === 'teste123') {
-        const testUser = {
-          id: 'test-user',
-          name: 'Dr. Teste Silva',
-          email: 'teste@plantaomed.com',
-          subscription_status: 'trial',
-          trial_ends_at: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
-          created_at: new Date().toISOString(),
-          last_login: new Date().toISOString(),
-          total_plantoes: 0,
-          total_revenue: 0
-        };
-
-        localStorage.setItem('user-session', JSON.stringify(testUser));
-        toast.success('Login realizado com sucesso!');
-        router.push('/app');
-        return;
-      }
-
-      // Para outros emails, simular login bem-sucedido
+      // Criar dados do usuário
       const userData = {
         id: Date.now().toString(),
-        name: email.split('@')[0],
+        name: email === 'teste@plantaomed.com' ? 'Dr. Teste Silva' : email.split('@')[0],
         email: email,
         subscription_status: 'trial',
         trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
@@ -58,14 +40,17 @@ export default function LoginPage() {
         total_revenue: 0
       };
 
+      console.log('Salvando usuário:', userData);
       localStorage.setItem('user-session', JSON.stringify(userData));
+      
       toast.success('Login realizado com sucesso!');
+      
+      console.log('Redirecionando para /app');
       router.push('/app');
       
     } catch (error) {
-      toast.error('Erro inesperado', {
-        description: 'Tente novamente em alguns instantes'
-      });
+      console.error('Erro no login:', error);
+      toast.error('Erro no login');
     } finally {
       setIsLoading(false);
     }
@@ -151,7 +136,7 @@ export default function LoginPage() {
                     Entrando...
                   </div>
                 ) : (
-                  'Entrar'
+                  'Entrar no App'
                 )}
               </Button>
             </form>
@@ -164,21 +149,14 @@ export default function LoginPage() {
                 </Link>
               </p>
             </div>
-
-            <div className="mt-4 text-center">
-              <Link href="/forgot-password" className="text-sm text-gray-500 hover:text-gray-700">
-                Esqueceu sua senha?
-              </Link>
-            </div>
           </CardContent>
         </Card>
 
-        {/* Credenciais de Teste */}
-        <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
-          <h3 className="font-semibold text-blue-800 mb-2">Credenciais de Teste:</h3>
-          <div className="text-sm text-blue-700 space-y-1">
-            <p><strong>Email:</strong> teste@plantaomed.com</p>
-            <p><strong>Senha:</strong> teste123</p>
+        {/* Credenciais já preenchidas */}
+        <div className="mt-6 p-4 bg-green-50 rounded-xl border border-green-200">
+          <h3 className="font-semibold text-green-800 mb-2">✅ Credenciais já preenchidas!</h3>
+          <div className="text-sm text-green-700">
+            <p>Clique em "Entrar no App" para acessar</p>
           </div>
         </div>
       </div>
