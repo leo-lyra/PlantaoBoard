@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CalendarIcon, Calculator, Clock, DollarSign, Percent } from 'lucide-react';
+import { CalendarIcon, Calculator, Clock, DollarSign, Percent, CheckCircle } from 'lucide-react';
 import { usePlantao } from '@/contexts/PlantaoContext';
 import { Plantao } from '@/types/plantao';
 import { HospitalSelector } from './HospitalSelector';
@@ -33,6 +33,7 @@ export function PlantaoForm({ plantao, onSuccess }: PlantaoFormProps) {
   const { addPlantao, updatePlantao } = usePlantao();
   const [calcularImpostoAuto, setCalcularImpostoAuto] = useState(true);
   const [percentualImposto, setPercentualImposto] = useState(11);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -55,8 +56,11 @@ export function PlantaoForm({ plantao, onSuccess }: PlantaoFormProps) {
   });
 
   const valorRecebido = watch('valorRecebido');
+  const horasTrabalhadas = watch('horasTrabalhadas');
+  const imposto = watch('imposto');
   const localValue = watch('local');
 
+  // Cálculo automático do imposto
   React.useEffect(() => {
     if (calcularImpostoAuto && valorRecebido) {
       const impostoCalculado = (valorRecebido * percentualImposto) / 100;
@@ -64,23 +68,41 @@ export function PlantaoForm({ plantao, onSuccess }: PlantaoFormProps) {
     }
   }, [valorRecebido, percentualImposto, calcularImpostoAuto, setValue]);
 
-  const onSubmit = (data: PlantaoFormData) => {
-    const plantaoData = {
-      ...data,
-      statusPagamento: plantao?.statusPagamento || 'À Receber' as const,
-      numeroNotaFiscal: plantao?.numeroNotaFiscal,
-    };
+  // Cálculos em tempo real
+  const valorLiquido = valorRecebido && imposto ? valorRecebido - imposto : 0;
+  const valorPorHora = valorRecebido && horasTrabalhadas ? valorRecebido / horasTrabalhadas : 0;
 
-    if (plantao) {
-      updatePlantao(plantao.id, plantaoData);
-      toast.success('Plantão atualizado com sucesso!');
-    } else {
-      addPlantao(plantaoData);
-      toast.success('Plantão cadastrado com sucesso! Status: À Receber');
-      reset();
+  const onSubmit = async (data: PlantaoFormData) => {
+    setIsSubmitting(true);
+    
+    try {
+      const plantaoData = {
+        ...data,
+        statusPagamento: plantao?.statusPagamento || 'À Receber' as const,
+        numeroNotaFiscal: plantao?.numeroNotaFiscal,
+      };
+
+      if (plantao) {
+        updatePlantao(plantao.id, plantaoData);
+        toast.success('Plantão atualizado com sucesso!', {
+          description: 'As informações foram salvas e o dashboard foi atualizado.',
+        });
+      } else {
+        addPlantao(plantaoData);
+        toast.success('Plantão cadastrado com sucesso!', {
+          description: 'Status: À Receber • Disponível na planilha de plantões.',
+        });
+        reset();
+      }
+
+      onSuccess?.();
+    } catch (error) {
+      toast.error('Erro ao salvar plantão', {
+        description: 'Tente novamente ou verifique os dados informados.',
+      });
+    } finally {
+      setIsSubmitting(false);
     }
-
-    onSuccess?.();
   };
 
   return (
@@ -98,6 +120,7 @@ export function PlantaoForm({ plantao, onSuccess }: PlantaoFormProps) {
         </p>
         {!plantao && (
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-100 border border-yellow-200 rounded-lg">
+            <CheckCircle className="h-4 w-4 text-yellow-600" />
             <span className="text-yellow-800 text-sm font-medium">
               Status padrão: À Receber
             </span>
@@ -176,6 +199,35 @@ export function PlantaoForm({ plantao, onSuccess }: PlantaoFormProps) {
               </div>
             </div>
 
+            {/* Cálculos em Tempo Real */}
+            {(valorRecebido || horasTrabalhadas || imposto) && (
+              <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+                <CardContent className="p-4">
+                  <h3 className="font-semibold text-gray-900 mb-3">Cálculos Automáticos</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div className="text-center p-3 bg-white rounded-lg">
+                      <p className="text-gray-600">Valor Líquido</p>
+                      <p className="text-lg font-bold text-blue-600">
+                        R$ {valorLiquido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </p>
+                    </div>
+                    <div className="text-center p-3 bg-white rounded-lg">
+                      <p className="text-gray-600">Valor por Hora</p>
+                      <p className="text-lg font-bold text-emerald-600">
+                        R$ {valorPorHora.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </p>
+                    </div>
+                    <div className="text-center p-3 bg-white rounded-lg">
+                      <p className="text-gray-600">% Imposto</p>
+                      <p className="text-lg font-bold text-orange-600">
+                        {valorRecebido ? ((imposto / valorRecebido) * 100).toFixed(1) : 0}%
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Imposto */}
             <div className="space-y-6 p-6 bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl border border-gray-200">
               <div className="flex items-center justify-between">
@@ -206,6 +258,9 @@ export function PlantaoForm({ plantao, onSuccess }: PlantaoFormProps) {
                     className="w-24 h-10 border-2 border-gray-200 rounded-lg focus:border-orange-500"
                   />
                   <span className="text-gray-600 font-medium">%</span>
+                  <div className="ml-auto text-sm text-gray-600">
+                    Sugestão: MEI 11% • Simples 15-20%
+                  </div>
                 </div>
               )}
 
@@ -232,9 +287,17 @@ export function PlantaoForm({ plantao, onSuccess }: PlantaoFormProps) {
 
             <Button 
               type="submit" 
-              className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+              disabled={isSubmitting}
+              className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
             >
-              {plantao ? 'Atualizar Plantão' : 'Cadastrar Plantão'}
+              {isSubmitting ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Salvando...
+                </div>
+              ) : (
+                plantao ? 'Atualizar Plantão' : 'Cadastrar Plantão'
+              )}
             </Button>
           </form>
         </CardContent>

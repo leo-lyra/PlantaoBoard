@@ -6,48 +6,17 @@ import { Button } from '@/components/ui/button';
 import { 
   Plus, BarChart3, Calendar, Clock, DollarSign, 
   TrendingUp, MapPin, Stethoscope, ArrowRight,
-  Target, Shield, Zap
+  Target, Shield, Zap, AlertCircle
 } from 'lucide-react';
 import { usePlantao } from '@/contexts/PlantaoContext';
+import { PlantaoStats } from './PlantaoStats';
 
 interface HomePageProps {
   onNavigate: (tab: string) => void;
 }
 
 export function HomePage({ onNavigate }: HomePageProps) {
-  const { plantoes, getDashboardMetrics } = usePlantao();
-  const metrics = getDashboardMetrics(plantoes);
-
-  const quickStats = [
-    {
-      label: 'Total Recebido',
-      value: `R$ ${metrics.totalRecebido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-      icon: DollarSign,
-      gradient: 'from-emerald-500 to-teal-600',
-      bgGradient: 'from-emerald-50 to-teal-50'
-    },
-    {
-      label: 'Horas Trabalhadas',
-      value: `${metrics.totalHoras}h`,
-      icon: Clock,
-      gradient: 'from-blue-500 to-indigo-600',
-      bgGradient: 'from-blue-50 to-indigo-50'
-    },
-    {
-      label: 'Total de Plantões',
-      value: metrics.totalPlantoes.toString(),
-      icon: Calendar,
-      gradient: 'from-purple-500 to-pink-600',
-      bgGradient: 'from-purple-50 to-pink-50'
-    },
-    {
-      label: 'Valor/Hora Médio',
-      value: `R$ ${metrics.valorMedioHora.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-      icon: TrendingUp,
-      gradient: 'from-orange-500 to-red-600',
-      bgGradient: 'from-orange-50 to-red-50'
-    }
-  ];
+  const { plantoes } = usePlantao();
 
   const features = [
     {
@@ -71,6 +40,14 @@ export function HomePage({ onNavigate }: HomePageProps) {
       description: 'Design moderno e responsivo para máxima produtividade'
     }
   ];
+
+  // Plantões recentes (últimos 5)
+  const plantoesRecentes = plantoes
+    .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
+    .slice(0, 5);
+
+  // Plantões pendentes
+  const plantoesPendentes = plantoes.filter(p => p.statusPagamento === 'À Receber');
 
   return (
     <div className="space-y-8">
@@ -119,28 +96,10 @@ export function HomePage({ onNavigate }: HomePageProps) {
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-24 -translate-x-24"></div>
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {quickStats.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <Card key={index} className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
-              <div className={`absolute inset-0 bg-gradient-to-br ${stat.bgGradient} opacity-50`}></div>
-              <CardContent className="relative p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`p-3 rounded-xl bg-gradient-to-br ${stat.gradient} shadow-lg`}>
-                    <Icon className="h-6 w-6 text-white" />
-                  </div>
-                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all duration-300" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">{stat.label}</p>
-                  <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+      {/* Estatísticas Rápidas */}
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold text-gray-900">Resumo Financeiro</h2>
+        <PlantaoStats />
       </div>
 
       {/* Quick Actions */}
@@ -181,6 +140,53 @@ export function HomePage({ onNavigate }: HomePageProps) {
         </CardContent>
       </Card>
 
+      {/* Plantões Pendentes */}
+      {plantoesPendentes.length > 0 && (
+        <Card className="border-0 shadow-lg bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200">
+          <CardHeader className="pb-4">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-yellow-600" />
+              <CardTitle className="text-xl text-yellow-800">Plantões À Receber</CardTitle>
+            </div>
+            <p className="text-yellow-700">Você tem {plantoesPendentes.length} plantão(ões) aguardando pagamento</p>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {plantoesPendentes.slice(0, 3).map((plantao) => (
+                <div key={plantao.id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-yellow-200">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-yellow-100 rounded-lg">
+                      <MapPin className="h-4 w-4 text-yellow-600" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">{plantao.local}</p>
+                      <p className="text-sm text-gray-600">
+                        {new Date(plantao.data).toLocaleDateString('pt-BR')} • {plantao.horasTrabalhadas}h
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-yellow-600">
+                      R$ {plantao.valorRecebido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </p>
+                    <p className="text-sm text-gray-500">À Receber</p>
+                  </div>
+                </div>
+              ))}
+              {plantoesPendentes.length > 3 && (
+                <Button 
+                  variant="outline" 
+                  className="w-full mt-3 border-yellow-300 text-yellow-700 hover:bg-yellow-50"
+                  onClick={() => onNavigate('listar')}
+                >
+                  Ver todos os {plantoesPendentes.length} plantões pendentes
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Features */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {features.map((feature, index) => {
@@ -204,7 +210,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
       </div>
 
       {/* Recent Activity */}
-      {plantoes.length > 0 && (
+      {plantoesRecentes.length > 0 && (
         <Card className="border-0 shadow-lg">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
@@ -224,7 +230,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {plantoes.slice(-3).reverse().map((plantao) => (
+              {plantoesRecentes.map((plantao) => (
                 <div key={plantao.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-blue-100 rounded-lg">
