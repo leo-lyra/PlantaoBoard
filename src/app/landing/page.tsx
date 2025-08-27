@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { ConfigurationCheck } from '@/components/ConfigurationCheck';
 import { 
   Stethoscope, Check, Star, Users, TrendingUp, Shield, 
   Zap, BarChart3, Clock, DollarSign, ArrowRight, 
@@ -13,6 +14,20 @@ import Link from 'next/link';
 
 export default function LandingPage() {
   const [planoSelecionado, setPlanoSelecionado] = useState<'mensal' | 'anual'>('anual');
+
+  // Verificar se o Supabase está configurado
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  
+  const isSupabaseConfigured = supabaseUrl && 
+    supabaseUrl !== 'https://your-project-id.supabase.co' &&
+    supabaseAnonKey && 
+    supabaseAnonKey !== 'your-anon-key-here';
+
+  // Se não estiver configurado, mostrar tela de configuração
+  if (!isSupabaseConfigured) {
+    return <ConfigurationCheck />;
+  }
 
   const planos = {
     mensal: {
@@ -238,6 +253,7 @@ export default function LandingPage() {
                 <div className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-transform duration-300 ${
                   planoSelecionado === 'anual' ? 'translate-x-8' : 'translate-x-1'
                 }`} />
+              
               </button>
               <span className={`font-medium ${planoSelecionado === 'anual' ? 'text-blue-600' : 'text-gray-500'}`}>
                 Anual
