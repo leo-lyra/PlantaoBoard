@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { MapPin, Hospital, Building2, Stethoscope } from 'lucide-react';
 import { usePlantao } from '@/contexts/PlantaoContext';
 import dynamic from 'next/dynamic';
+import type { LatLngExpression } from 'leaflet';
 
 // Importação dinâmica para evitar problemas de SSR
 const MapContainer = dynamic(
@@ -27,6 +28,18 @@ const Popup = dynamic(
   () => import('react-leaflet').then((mod) => mod.Popup),
   { ssr: false }
 );
+
+interface LocalAgrupado {
+  local: string;
+  cidade?: string;
+  estado?: string;
+  latitude: number;
+  longitude: number;
+  tipoLocal?: string;
+  plantoes: any[];
+  totalRecebido: number;
+  totalHoras: number;
+}
 
 export function MapaPlantoes() {
   const { plantoes } = usePlantao();
@@ -74,7 +87,7 @@ export function MapaPlantoes() {
     acc[key].totalRecebido += plantao.valorRecebido;
     acc[key].totalHoras += plantao.horasTrabalhadas;
     return acc;
-  }, {} as any);
+  }, {} as Record<string, LocalAgrupado>);
 
   const locais = Object.values(locaisAgrupados);
 
@@ -101,7 +114,7 @@ export function MapaPlantoes() {
   };
 
   // Centro do Brasil para visualização inicial
-  const centerBrasil = [-14.2350, -51.9253];
+  const centerBrasil: LatLngExpression = [-14.2350, -51.9253];
 
   if (!isClient || !L) {
     return (
@@ -149,18 +162,19 @@ export function MapaPlantoes() {
             {/* Mapa */}
             <div className="h-96 rounded-lg overflow-hidden border border-gray-200">
               <MapContainer
-                center={centerBrasil as [number, number]}
+                center={centerBrasil}
                 zoom={4}
                 style={{ height: '100%', width: '100%' }}
+                scrollWheelZoom={false}
               >
                 <TileLayer
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 />
-                {locais.map((local: any, index: number) => (
+                {locais.map((local: LocalAgrupado, index: number) => (
                   <Marker
                     key={index}
-                    position={[local.latitude, local.longitude]}
+                    position={[local.latitude, local.longitude] as LatLngExpression}
                   >
                     <Popup>
                       <div className="p-2 min-w-[200px]">
@@ -202,7 +216,7 @@ export function MapaPlantoes() {
 
             {/* Lista de locais */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {locais.map((local: any, index: number) => {
+              {locais.map((local: LocalAgrupado, index: number) => {
                 const Icon = getTipoIcon(local.tipoLocal);
                 return (
                   <div
