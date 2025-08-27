@@ -132,13 +132,6 @@ export function HospitalSelector({ value, onChange, error }: HospitalSelectorPro
         </Button>
       </div>
 
-      {value && (
-        <p className="text-sm text-green-600 flex items-center gap-1">
-          <span className="w-1 h-1 bg-green-500 rounded-full"></span>
-          Local selecionado: <span className="font-medium">{value}</span>
-        </p>
-      )}
-
       {error && (
         <p className="text-sm text-red-500 flex items-center gap-1">
           <span className="w-1 h-1 bg-red-500 rounded-full"></span>
