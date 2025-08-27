@@ -8,49 +8,44 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Stethoscope, Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { toast } from 'sonner';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('teste@plantaomed.com');
-  const [password, setPassword] = useState('teste123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const supabase = createClientComponentClient();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      console.log('Tentando fazer login com:', email, password);
-      
-      // Simular autenticação
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-      // Criar dados do usuário
-      const userData = {
-        id: Date.now().toString(),
-        name: email === 'teste@plantaomed.com' ? 'Dr. Teste Silva' : email.split('@')[0],
-        email: email,
-        subscription_status: 'trial',
-        trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        created_at: new Date().toISOString(),
-        last_login: new Date().toISOString(),
-        total_plantoes: 0,
-        total_revenue: 0
-      };
+      if (error) {
+        toast.error('Erro ao fazer login', {
+          description: error.message === 'Invalid login credentials' 
+            ? 'Email ou senha incorretos' 
+            : error.message
+        });
+        return;
+      }
 
-      console.log('Salvando usuário:', userData);
-      localStorage.setItem('user-session', JSON.stringify(userData));
-      
-      toast.success('Login realizado com sucesso!');
-      
-      console.log('Redirecionando para /app');
-      router.push('/app');
-      
+      if (data.user) {
+        toast.success('Login realizado com sucesso!');
+        router.push('/app');
+      }
     } catch (error) {
-      console.error('Erro no login:', error);
-      toast.error('Erro no login');
+      toast.error('Erro inesperado', {
+        description: 'Tente novamente em alguns instantes'
+      });
     } finally {
       setIsLoading(false);
     }
@@ -136,7 +131,7 @@ export default function LoginPage() {
                     Entrando...
                   </div>
                 ) : (
-                  'Entrar no App'
+                  'Entrar'
                 )}
               </Button>
             </form>
@@ -149,15 +144,23 @@ export default function LoginPage() {
                 </Link>
               </p>
             </div>
+
+            <div className="mt-4 text-center">
+              <Link href="/forgot-password" className="text-sm text-gray-500 hover:text-gray-700">
+                Esqueceu sua senha?
+              </Link>
+            </div>
           </CardContent>
         </Card>
 
-        {/* Credenciais já preenchidas */}
-        <div className="mt-6 p-4 bg-green-50 rounded-xl border border-green-200">
-          <h3 className="font-semibold text-green-800 mb-2">✅ Credenciais já preenchidas!</h3>
-          <div className="text-sm text-green-700">
-            <p>Clique em "Entrar no App" para acessar</p>
-          </div>
+        {/* Footer */}
+        <div className="text-center mt-8 text-sm text-gray-500">
+          <p>Ao fazer login, você concorda com nossos</p>
+          <p>
+            <Link href="/terms" className="hover:text-gray-700">Termos de Uso</Link>
+            {' e '}
+            <Link href="/privacy" className="hover:text-gray-700">Política de Privacidade</Link>
+          </p>
         </div>
       </div>
     </div>

@@ -4,83 +4,57 @@ import type { NextRequest } from 'next/server';
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
-  
-  // Verificar se as variáveis de ambiente estão configuradas
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  
-  if (!supabaseUrl || !supabaseAnonKey || 
-      supabaseUrl === 'https://your-project-id.supabase.co' || 
-      supabaseAnonKey === 'your-anon-key-here') {
-    
-    // Se não estiver configurado, permitir acesso apenas às rotas públicas
-    const publicRoutes = ['/landing', '/login', '/register', '/terms', '/privacy', '/'];
-    const isPublicRoute = publicRoutes.some(route => req.nextUrl.pathname.startsWith(route));
-    
-    if (!isPublicRoute) {
-      return NextResponse.redirect(new URL('/landing', req.url));
-    }
-    
-    return res;
+  const supabase = createMiddlewareClient({ req, res });
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  // Rotas públicas que não precisam de autenticação
+  const publicRoutes = ['/landing', '/login', '/register', '/forgot-password', '/terms', '/privacy'];
+  const isPublicRoute = publicRoutes.some(route => req.nextUrl.pathname.startsWith(route));
+
+  // Redirecionar para landing se não estiver logado e tentar acessar rota protegida
+  if (!session && !isPublicRoute && req.nextUrl.pathname !== '/') {
+    return NextResponse.redirect(new URL('/landing', req.url));
   }
 
-  try {
-    const supabase = createMiddlewareClient({ req, res });
+  // Se estiver logado e tentar acessar rotas de auth, redirecionar para app
+  if (session && (req.nextUrl.pathname === '/login' || req.nextUrl.pathname === '/register')) {
+    return NextResponse.redirect(new URL('/app', req.url));
+  }
 
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+  // Verificar status da assinatura para rotas do app
+  if (session && req.nextUrl.pathname.startsWith('/app')) {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('subscription_status, trial_ends_at')
+        .eq('id', session.user.id)
+        .single();
 
-    // Rotas públicas que não precisam de autenticação
-    const publicRoutes = ['/landing', '/login', '/register', '/forgot-password', '/terms', '/privacy'];
-    const isPublicRoute = publicRoutes.some(route => req.nextUrl.pathname.startsWith(route));
-
-    // Redirecionar para landing se não estiver logado e tentar acessar rota protegida
-    if (!session && !isPublicRoute && req.nextUrl.pathname !== '/') {
-      return NextResponse.redirect(new URL('/landing', req.url));
+      const now = new Date();
+      const trialEndsAt = profile?.trial_ends_at ? new Date(profile.trial_ends_at) : null;
+      
+      // Verificar se o trial expirou e não tem assinatura ativa
+      if (profile?.subscription_status !== 'active' && trialEndsAt && now > trialEndsAt) {
+        return NextResponse.redirect(new URL('/checkout', req.url));
+      }
+    } catch (error) {
+      console.error('Erro ao verificar assinatura:', error);
     }
+  }
 
-    // Se estiver logado e tentar acessar rotas de auth, redirecionar para app
-    if (session && (req.nextUrl.pathname === '/login' || req.nextUrl.pathname === '/register')) {
+  // Redirecionar root para landing ou app baseado no status de login
+  if (req.nextUrl.pathname === '/') {
+    if (session) {
       return NextResponse.redirect(new URL('/app', req.url));
+    } else {
+      return NextResponse.redirect(new URL('/landing', req.url));
     }
-
-    // Verificar status da assinatura para rotas do app
-    if (session && req.nextUrl.pathname.startsWith('/app')) {
-      try {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('subscription_status, trial_ends_at')
-          .eq('id', session.user.id)
-          .single();
-
-        const now = new Date();
-        const trialEndsAt = profile?.trial_ends_at ? new Date(profile.trial_ends_at) : null;
-        
-        // Verificar se o trial expirou e não tem assinatura ativa
-        if (profile?.subscription_status !== 'active' && trialEndsAt && now > trialEndsAt) {
-          return NextResponse.redirect(new URL('/checkout', req.url));
-        }
-      } catch (error) {
-        console.error('Erro ao verificar assinatura:', error);
-      }
-    }
-
-    // Redirecionar root para landing ou app baseado no status de login
-    if (req.nextUrl.pathname === '/') {
-      if (session) {
-        return NextResponse.redirect(new URL('/app', req.url));
-      } else {
-        return NextResponse.redirect(new URL('/landing', req.url));
-      }
-    }
-
-    return res;
-  } catch (error) {
-    console.error('Erro no middleware:', error);
-    // Em caso de erro, permitir acesso
-    return res;
   }
+
+  return res;
 }
 
 export const config = {
