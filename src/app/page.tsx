@@ -32,7 +32,6 @@ export default function Home() {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
         <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
         
-        {/* Main Content */}
         <div className="md:pl-72">
           <main className="p-4 md:p-8">
             <div className="max-w-7xl mx-auto">
