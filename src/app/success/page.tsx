@@ -1,3 +1,4 @@
+// src/app/success/page.tsx
 import { Suspense } from "react";
 import SuccessClient from "./SuccessClient";
 
@@ -12,4 +13,3 @@ export default function Page() {
     </Suspense>
   );
 }
-
