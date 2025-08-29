@@ -1,20 +1,13 @@
-import type { NextConfig } from "next";
+// src/lib/utils.ts
+import type { ClassValue } from "clsx";
+import clsx from "clsx";
+import { twMerge } from "tailwind-merge";
 
-const nextConfig: NextConfig = {
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "*.supabase.co",
-        pathname: "/storage/v1/object/**",
-      },
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-      },
-    ],
-  },
-  reactStrictMode: true,
-};
+/** Merge de classes Tailwind com condicionais */
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(...inputs));
+}
 
-export default nextConfig;
+// export default também, para cobrir imports diferentes
+export default cn;
+
