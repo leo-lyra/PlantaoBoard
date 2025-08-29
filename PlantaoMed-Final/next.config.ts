@@ -1,9 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Otimizações para Vercel
-  output: "standalone",
-
   // Configurações de imagem otimizadas
   images: {
     remotePatterns: [
@@ -20,15 +17,16 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // Configurações experimentais estáveis
+  // Configurações experimentais atualizadas para Next.js 15
   experimental: {
-    typedRoutes: false, // Desabilitado para evitar conflitos
-    serverComponentsExternalPackages: ["@supabase/supabase-js"],
+    typedRoutes: false,
   },
+
+  // Configuração movida para fora do experimental
+  serverExternalPackages: ["@supabase/supabase-js"],
 
   // Configurações de webpack para resolver problemas comuns
   webpack: (config, { isServer }) => {
-    // Resolver problemas com módulos Node.js
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -38,15 +36,6 @@ const nextConfig: NextConfig = {
         crypto: false,
       };
     }
-
-    // Otimizações de bundle
-    config.optimization = {
-      ...config.optimization,
-      splitChunks: {
-        ...config.optimization.splitChunks,
-        chunks: "all",
-      },
-    };
 
     return config;
   },
@@ -73,35 +62,26 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // ESLint configuração para não quebrar build
+  // ESLint e TypeScript configurações
   eslint: {
-    ignoreDuringBuilds: false, // Manter linting ativo para qualidade
+    ignoreDuringBuilds: false,
   },
 
-  // TypeScript configuração
   typescript: {
-    ignoreBuildErrors: false, // Não ignorar erros TS
+    ignoreBuildErrors: false,
   },
 
-  // Configurações de compilação
-  swcMinify: true,
-
-  // Configurações de ambiente otimizadas para Lasy
+  // Configurações de ambiente
   env: {
-    // Variáveis customizadas
     CUSTOM_KEY: process.env.CUSTOM_KEY,
-
-    // Fallbacks para variáveis comuns
     OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || "",
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY || "",
   },
 
-  // Configurações específicas para preview da Lasy
+  // Configurações específicas para desenvolvimento
   ...(process.env.NODE_ENV === "development" && {
-    // Configurações otimizadas para desenvolvimento
-    reactStrictMode: false, // Para compatibilidade com preview
-    swcMinify: false, // Desabilitar minify em dev para melhor debugging
+    reactStrictMode: false,
   }),
 };
 
