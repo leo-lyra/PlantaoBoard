@@ -15,17 +15,21 @@ export default function RegisterPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     try {
       setLoading(true);
+
+      // Cadastro com email/senha
       const { error } = await supabase.auth.signUp({ email, password });
       if (error) {
         toast.error("Falha ao registrar", { description: error.message });
         return;
       }
+
       toast.success("Conta criada! Faça login para continuar.");
       router.push("/login");
     } finally {
@@ -52,17 +56,29 @@ export default function RegisterPage() {
                 autoComplete="email"
               />
             </div>
+
             <div>
               <label className="text-sm">Senha</label>
-              <Input
-                type="password"
-                required
-                placeholder="Mín. 6 caracteres"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="new-password"
-              />
+              <div className="relative">
+                <Input
+                  type={showPwd ? "text" : "password"}
+                  required
+                  placeholder="Mín. 6 caracteres"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="new-password"
+                  className="pr-20"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPwd((v) => !v)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-muted-foreground hover:underline"
+                >
+                  {showPwd ? "Ocultar" : "Mostrar"}
+                </button>
+              </div>
             </div>
+
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Criando conta..." : "Criar conta"}
             </Button>
@@ -70,7 +86,9 @@ export default function RegisterPage() {
 
           <div className="mt-4 text-center text-sm text-muted-foreground">
             Já tem conta?{" "}
-            <Link href="/login" className="underline">Entrar</Link>
+            <Link href="/login" className="underline">
+              Entrar
+            </Link>
           </div>
         </CardContent>
       </Card>
