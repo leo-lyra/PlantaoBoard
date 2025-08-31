@@ -10,7 +10,6 @@ import {
   CheckCircle, Quote, Play, Award, Target
 } from 'lucide-react';
 import Link from 'next/link';
-import MobileShell from '@/components/layout/MobileShell'; // 👈 novo wrapper de enquadramento
 
 export default function LandingPage() {
   const [planoSelecionado, setPlanoSelecionado] = useState<'mensal' | 'anual'>('anual');
@@ -19,7 +18,7 @@ export default function LandingPage() {
     mensal: {
       preco: 9.90,
       periodo: 'mês',
-      economia: null as string | null,
+      economia: null,
       priceId: 'price_mensal_PlantaoBoard'
     },
     anual: {
@@ -74,9 +73,9 @@ export default function LandingPage() {
   ];
 
   return (
-    <MobileShell>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50 rounded-xl">
+      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
@@ -303,7 +302,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Final */}
-      <section className="py-16 bg-gradient-to-r from-blue-600 to-purple-700 text-white rounded-2xl">
+      <section className="py-16 bg-gradient-to-r from-blue-600 to-purple-700 text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Pronto Para Transformar Sua Gestão Financeira?
@@ -321,7 +320,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12 rounded-2xl mt-8">
+      <footer className="bg-gray-900 text-white py-12">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="flex items-center gap-3 mb-4 md:mb-0">
@@ -337,6 +336,6 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
-    </MobileShell>
+    </div>
   );
 }
