@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Navigation } from '@/components/Navigation';
+import Navigation from "@/components/Navigation";
 import { HomePage } from '@/components/HomePage';
 import { Dashboard } from '@/components/Dashboard';
 import { PlantaoForm } from '@/components/PlantaoForm';
