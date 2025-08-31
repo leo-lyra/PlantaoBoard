@@ -21,7 +21,7 @@ export function supabaseServer() {
   return createServerComponentClient<DB>({ cookies });
 }
 
-/** Cliente para ROUTE HANDLERS (arquivos em app/api/**/route.ts) */
+// Cliente para ROUTE HANDLERS (arquivos em app/api/.../route.ts)
 export function supabaseRoute() {
   return createRouteHandlerClient<DB>({ cookies });
 }
