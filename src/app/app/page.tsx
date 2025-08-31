@@ -7,8 +7,6 @@ import { Dashboard } from '@/components/Dashboard';
 import { PlantaoForm } from '@/components/PlantaoForm';
 import { PlantaoList } from '@/components/PlantaoList';
 import { PlantaoProvider } from '@/contexts/PlantaoContext';
-import { supabaseServer } from "@/lib/supabase-server";
-import { Toaster } from '@/components/ui/sonner';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -16,6 +14,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { LogOut, Crown, Clock, CreditCard } from 'lucide-react';
 import Link from 'next/link';
+import { Toaster } from '@/components/ui/sonner';
 
 export default function AppPage() {
   const [activeTab, setActiveTab] = useState('home');
@@ -29,15 +28,12 @@ export default function AppPage() {
     const getUser = async () => {
       try {
         const { data: { user }, error } = await supabase.auth.getUser();
-        
         if (error || !user) {
           router.push('/landing');
           return;
         }
-
         setUser(user);
 
-        // Buscar perfil do usuário
         const { data: profile } = await supabase
           .from('profiles')
           .select('*')
@@ -63,10 +59,9 @@ export default function AppPage() {
 
   const getSubscriptionStatus = () => {
     if (!profile) return null;
-
     const now = new Date();
     const trialEndsAt = profile.trial_ends_at ? new Date(profile.trial_ends_at) : null;
-    
+
     if (profile.subscription_status === 'active') {
       return {
         type: 'active',
@@ -75,7 +70,6 @@ export default function AppPage() {
         icon: Crown
       };
     }
-    
     if (trialEndsAt && now < trialEndsAt) {
       const daysLeft = Math.ceil((trialEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
       return {
@@ -85,7 +79,6 @@ export default function AppPage() {
         icon: Clock
       };
     }
-    
     return {
       type: 'expired',
       label: 'Trial Expirado',
@@ -124,56 +117,26 @@ export default function AppPage() {
 
   return (
     <PlantaoProvider>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 flex">
+        {/* Sidebar */}
         <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
-        
-        {/* Main Content */}
-        <div className="md:pl-72">
-          {/* Top Bar */}
-          <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div>
-                  <h2 className="font-semibold text-gray-900">
-                    Olá, {user?.user_metadata?.name || user?.email?.split('@')[0]}!
-                  </h2>
-                  <p className="text-sm text-gray-600">
-                    Bem-vindo ao PlantãoBoard
-                  </p>
-                </div>
-                
-                {subscriptionStatus && (
-                  <Badge className={`${subscriptionStatus.color} border font-medium`}>
-                    <subscriptionStatus.icon className="h-4 w-4 mr-1" />
-                    {subscriptionStatus.label}
-                  </Badge>
-                )}
+
+        {/* Wrapper do conteúdo */}
+        <div className="md:pl-72 relative flex-1 flex flex-col">
+          {/* Top Bar colada no topo do wrapper */}
+          <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 p-4 sticky top-0 z-20">
+            <div className="flex items-center justify-between max-w-7xl mx-auto">
+              <div>
+                <h2 className="font-semibold text-gray-900">
+                  Olá, {user?.user_metadata?.name || user?.email?.split('@')[0]}!
+                </h2>
+                <p className="text-sm text-gray-600">Bem-vindo ao PlantãoBoard</p>
               </div>
-
-
-                {subscriptionStatus?.type === 'expired' && (
-                  <Link href="/checkout">
-                    <Button size="sm" className="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700">
-                      <CreditCard className="h-4 w-4 mr-1" />
-                      Reativar
-                    </Button>
-                  </Link>
-                )}
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleLogout}
-                  className="hover:bg-red-50 hover:border-red-200 hover:text-red-600"
-                >
-                  <LogOut className="h-4 w-4 mr-1" />
-                  Sair
-                </Button>
-              </div>
+              {/* <<< AQUI removi: badge de status, Upgrade e botão Sair >>> */}
             </div>
           </div>
 
-          {/* Trial Expiration Warning */}
+          {/* Aviso Trial Ativo */}
           {subscriptionStatus?.type === 'trial' && (
             <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4">
               <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -189,15 +152,13 @@ export default function AppPage() {
                   </div>
                 </div>
                 <Link href="/checkout">
-                  <Button className="bg-white text-blue-600 hover:bg-gray-100">
-                    Fazer Upgrade
-                  </Button>
+                  <Button className="bg-white text-blue-600 hover:bg-gray-100">Fazer Upgrade</Button>
                 </Link>
               </div>
             </div>
           )}
 
-          {/* Expired Trial Block */}
+          {/* Aviso Trial Expirado */}
           {subscriptionStatus?.type === 'expired' && (
             <div className="bg-red-500 text-white p-4">
               <div className="max-w-7xl mx-auto text-center">
@@ -209,30 +170,25 @@ export default function AppPage() {
                   Seu período de teste terminou. Reative sua assinatura para continuar usando o PlantãoBoard.
                 </p>
                 <Link href="/checkout">
-                  <Button className="bg-white text-red-600 hover:bg-gray-100">
-                    Reativar Assinatura
-                  </Button>
+                  <Button className="bg-white text-red-600 hover:bg-gray-100">Reativar Assinatura</Button>
                 </Link>
               </div>
             </div>
           )}
 
-          <main className="p-4 md:p-8">
+          {/* Conteúdo principal */}
+          <main className="flex-1 p-4 md:p-8 pt-4 md:pt-6 overflow-hidden">
             <div className="max-w-7xl mx-auto">
               {subscriptionStatus?.type === 'expired' ? (
                 <Card className="border-red-200 bg-red-50">
                   <CardContent className="p-8 text-center">
                     <CreditCard className="h-12 w-12 text-red-500 mx-auto mb-4" />
-                    <h2 className="text-2xl font-bold text-red-800 mb-4">
-                      Acesso Limitado
-                    </h2>
+                    <h2 className="text-2xl font-bold text-red-800 mb-4">Acesso Limitado</h2>
                     <p className="text-red-700 mb-6">
                       Seu trial expirou. Reative sua assinatura para continuar usando todos os recursos do PlantãoBoard.
                     </p>
                     <Link href="/checkout">
-                      <Button className="bg-red-600 hover:bg-red-700 text-white">
-                        Reativar Agora
-                      </Button>
+                      <Button className="bg-red-600 hover:bg-red-700 text-white">Reativar Agora</Button>
                     </Link>
                   </CardContent>
                 </Card>
@@ -242,15 +198,16 @@ export default function AppPage() {
             </div>
           </main>
         </div>
-        
-        <Toaster 
+
+        <Toaster
           position="top-right"
           toastOptions={{
             style: {
               background: 'white',
               border: '1px solid #e5e7eb',
               borderRadius: '12px',
-              boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+              boxShadow:
+                '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
               color: '#1f2937',
             },
           }}
