@@ -1,4 +1,5 @@
 // src/lib/supabase.ts
+// Arquivo único de clientes Supabase para Next.js (App Router).
 
 import { cookies } from "next/headers";
 import {
@@ -7,32 +8,20 @@ import {
   createRouteHandlerClient,
 } from "@supabase/auth-helpers-nextjs";
 
-// Se você não gerou os tipos do Supabase ainda, pode trocar <any> por nada
+// Se não tiver tipos gerados, troque <DB> por <any> ou remova o genérico.
 type DB = any;
 
-/**
- * Cliente para COMPONENTES CLIENT (use em páginas/Componentes com "use client")
- * Exemplo:
- *   const supabase = supabaseBrowser();
- */
+/** Cliente para COMPONENTES CLIENT (arquivos com "use client") */
 export function supabaseBrowser() {
   return createClientComponentClient<DB>();
 }
 
-/**
- * Cliente para SERVER COMPONENTS (RSC) — ex.: em `app/page.tsx` (sem "use client")
- * Exemplo:
- *   const supabase = supabaseServer();
- */
+/** Cliente para SERVER COMPONENTS (RSC) — ex.: app/page.tsx (sem "use client") */
 export function supabaseServer() {
   return createServerComponentClient<DB>({ cookies });
 }
 
-/**
- * Cliente para ROUTE HANDLERS (arquivos em `app/api/**/route.ts`)
- * Exemplo:
- *   const supabase = supabaseRoute();
- */
+/** Cliente para ROUTE HANDLERS (arquivos em app/api/**/route.ts) */
 export function supabaseRoute() {
   return createRouteHandlerClient<DB>({ cookies });
 }

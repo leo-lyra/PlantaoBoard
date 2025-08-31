@@ -1,14 +1,21 @@
 "use client";
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
-  Home, LayoutDashboard, Plus, List, Menu,
-  Calendar, BarChart3, FileText, Stethoscope
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { LogoutButton } from '@/components/LogoutButton';
+  Home,
+  LayoutDashboard,
+  Plus,
+  List,
+  Menu,
+  Calendar,
+  BarChart3,
+  FileText,
+  Stethoscope,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { LogoutButton } from "@/components/LogoutButton";
 
 interface NavigationProps {
   activeTab: string;
@@ -22,13 +29,13 @@ type NavItem = {
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { id: 'home',        label: 'Início',        Icon: Home },
-  { id: 'dashboard',   label: 'Dashboard',     Icon: LayoutDashboard },
-  { id: 'novo-plantao',label: 'Novo Plantão',  Icon: Plus },
-  { id: 'plantoes',    label: 'Meus Plantões', Icon: List },
-  { id: 'agenda',      label: 'Agenda',        Icon: Calendar },
-  { id: 'relatorios',  label: 'Relatórios',    Icon: FileText },
-  { id: 'estatisticas',label: 'Estatísticas',  Icon: BarChart3 },
+  { id: "home", label: "Início", Icon: Home },
+  { id: "dashboard", label: "Dashboard", Icon: LayoutDashboard },
+  { id: "novo-plantao", label: "Novo Plantão", Icon: Plus },
+  { id: "plantoes", label: "Meus Plantões", Icon: List },
+  { id: "agenda", label: "Agenda", Icon: Calendar },
+  { id: "relatorios", label: "Relatórios", Icon: FileText },
+  { id: "estatisticas", label: "Estatísticas", Icon: BarChart3 },
 ];
 
 function NavItems({
@@ -41,19 +48,19 @@ function NavItems({
   mobile?: boolean;
 }) {
   return (
-    <div className={cn('flex flex-col gap-2', mobile ? 'mt-4' : '')}>
+    <div className={cn("flex flex-col gap-2", mobile ? "mt-4" : "")}>
       {NAV_ITEMS.map(({ id, label, Icon }) => {
         const isActive = activeTab === id;
         return (
           <Button
             key={id}
-            variant="ghost")
+            variant="ghost"
             className={cn(
-              'w-full justify-start gap-3 transition-all duration-300 rounded-xl',
-              mobile ? 'h-14 text-base' : 'h-12',
+              "w-full justify-start gap-3 transition-all duration-300 rounded-xl",
+              mobile ? "h-14 text-base" : "h-12",
               isActive
-                ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg hover:from-blue-600 hover:to-purple-700'
-                : 'hover:bg-gray-100 text-gray-700 hover:text-gray-900'
+                ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg hover:from-blue-600 hover:to-purple-700"
+                : "hover:bg-gray-100 text-gray-700 hover:text-gray-900"
             )}
             onClick={() => onTabChange(id)}
           >
@@ -119,7 +126,11 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
                   </div>
                 </div>
 
-                <NavItems activeTab={activeTab} onTabChange={onTabChange} mobile />
+                <NavItems
+                  activeTab={activeTab}
+                  onTabChange={onTabChange}
+                  mobile
+                />
 
                 <div className="pt-4 border-t mt-6">
                   <LogoutButton />
