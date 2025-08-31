@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Stethoscope, Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { supabaseBrowser } from '@/lib/supabase-browser'; // ✅ usa cliente do lado do cliente
 import { toast } from 'sonner';
 
 export default function LoginPage() {
@@ -17,7 +17,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const supabase = createClientComponentClient();
+  const supabase = supabaseBrowser(); // ✅ cria o client correto
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,9 +31,10 @@ export default function LoginPage() {
 
       if (error) {
         toast.error('Erro ao fazer login', {
-          description: error.message === 'Invalid login credentials' 
-            ? 'Email ou senha incorretos' 
-            : error.message
+          description:
+            error.message === 'Invalid login credentials'
+              ? 'Email ou senha incorretos'
+              : error.message,
         });
         return;
       }
@@ -42,9 +43,9 @@ export default function LoginPage() {
         toast.success('Login realizado com sucesso!');
         router.push('/app');
       }
-    } catch (error) {
+    } catch {
       toast.error('Erro inesperado', {
-        description: 'Tente novamente em alguns instantes'
+        description: 'Tente novamente em alguns instantes',
       });
     } finally {
       setIsLoading(false);
@@ -60,9 +61,9 @@ export default function LoginPage() {
             <ArrowLeft className="h-4 w-4" />
             Voltar para home
           </Link>
-          
+
           <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
+            <div className="p-3 bg-gradient-to-br from-blue-500 to purple-600 rounded-xl">
               <Stethoscope className="h-8 w-8 text-white" />
             </div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -92,6 +93,7 @@ export default function LoginPage() {
                   placeholder="seu@email.com"
                   required
                   className="h-12 border-2 border-gray-200 rounded-xl focus:border-blue-500"
+                  autoComplete="email"
                 />
               </div>
 
@@ -109,6 +111,7 @@ export default function LoginPage() {
                     placeholder="Sua senha"
                     required
                     className="h-12 border-2 border-gray-200 rounded-xl focus:border-blue-500 pr-12"
+                    autoComplete="current-password"
                   />
                   <button
                     type="button"
@@ -127,7 +130,7 @@ export default function LoginPage() {
               >
                 {isLoading ? (
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     Entrando...
                   </div>
                 ) : (
