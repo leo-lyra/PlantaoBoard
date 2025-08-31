@@ -150,16 +150,7 @@ export default function AppPage() {
                 )}
               </div>
 
-              <div className="flex items-center gap-3">
-                {subscriptionStatus?.type === 'trial' && (
-                  <Link href="/checkout">
-                    <Button size="sm" className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
-                      <Crown className="h-4 w-4 mr-1" />
-                      Upgrade
-                    </Button>
-                  </Link>
-                )}
-                
+
                 {subscriptionStatus?.type === 'expired' && (
                   <Link href="/checkout">
                     <Button size="sm" className="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700">
