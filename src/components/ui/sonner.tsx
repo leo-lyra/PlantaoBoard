@@ -1,21 +1,31 @@
 "use client";
 
-import * as React from "react";
-import { Toaster as SonnerToaster } from "sonner";
+import { useTheme } from "next-themes";
+import { Toaster as Sonner } from "sonner";
 
-export type ToasterProps = React.ComponentProps<typeof SonnerToaster>;
+type ToasterProps = React.ComponentProps<typeof Sonner>;
 
-/** Wrapper do Sonner com defaults seguros para o app */
-export function Toaster(props: ToasterProps) {
+const Toaster = ({ ...props }: ToasterProps) => {
+  const { theme = "system" } = useTheme();
+
   return (
-    <SonnerToaster
-      richColors
-      closeButton
-      position="top-right"
+    <Sonner
+      theme={theme as ToasterProps["theme"]}
+      className="toaster group"
+      toastOptions={{
+        classNames: {
+          toast:
+            "group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg",
+          description: "group-[.toast]:text-muted-foreground",
+          actionButton:
+            "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
+          cancelButton:
+            "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground",
+        },
+      }}
       {...props}
     />
   );
-}
+};
 
-/** Também exporta default para quem importar sem chaves */
-export default Toaster;
+export { Toaster };
