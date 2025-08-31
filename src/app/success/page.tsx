@@ -3,14 +3,15 @@
 import React, { useEffect, useState } from 'react';
 import { Suspense } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { 
   CheckCircle, Stethoscope, ArrowRight, Gift, 
-  Star, Users, Zap, BarChart3 
+  Users, Zap, BarChart3 
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import MobileShell from '@/components/layout/MobileShell';
 
 function SuccessInner() {
   const [isLoading, setIsLoading] = useState(true);
@@ -22,13 +23,8 @@ function SuccessInner() {
     const updateUserSubscription = async () => {
       if (sessionId) {
         try {
-          // Aqui você verificaria o status do pagamento no Stripe
-          // e atualizaria o status da assinatura do usuário
-          
           const { data: { user } } = await supabase.auth.getUser();
-          
           if (user) {
-            // Atualizar status da assinatura no Supabase
             await supabase
               .from('profiles')
               .update({
@@ -49,54 +45,38 @@ function SuccessInner() {
   }, [sessionId, supabase]);
 
   const proximosPassos = [
-    {
-      icon: BarChart3,
-      title: 'Explore o Dashboard',
-      description: 'Veja analytics completos dos seus plantões',
-      action: 'Ver Dashboard'
-    },
-    {
-      icon: Zap,
-      title: 'Configure Automações',
-      description: 'Ative cálculos automáticos de impostos',
-      action: 'Configurar'
-    },
-    {
-      icon: Users,
-      title: 'Suporte Premium',
-      description: 'Acesso ao suporte prioritário 24/7',
-      action: 'Contatar'
-    }
+    { icon: BarChart3, title: 'Explore o Dashboard', description: 'Veja analytics completos dos seus plantões', action: 'Ver Dashboard' },
+    { icon: Zap,        title: 'Configure Automações', description: 'Ative cálculos automáticos de impostos',     action: 'Configurar' },
+    { icon: Users,      title: 'Suporte Premium',      description: 'Acesso ao suporte prioritário 24/7',         action: 'Contatar'  }
   ];
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Confirmando seu pagamento...</p>
+      <MobileShell>
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600">Confirmando seu pagamento...</p>
+          </div>
         </div>
-      </div>
+      </MobileShell>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-8 px-4">
+    <MobileShell>
       <div className="container mx-auto max-w-4xl">
         {/* Success Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-emerald-100 rounded-full mb-6">
             <CheckCircle className="h-10 w-10 text-emerald-600" />
           </div>
-          
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             🎉 <span className="text-emerald-600">Parabéns!</span>
           </h1>
-          
           <p className="text-xl md:text-2xl text-gray-600 mb-6">
             Sua assinatura foi ativada com sucesso!
           </p>
-          
           <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl shadow-lg text-white">
             <Stethoscope className="h-6 w-6" />
             <span className="text-lg font-semibold">Bem-vindo ao PlantãoBoard Pro!</span>
@@ -137,10 +117,7 @@ function SuccessInner() {
 
         {/* Próximos Passos */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-center mb-8">
-            Seus Próximos Passos
-          </h2>
-          
+          <h2 className="text-2xl font-bold text-center mb-8">Seus Próximos Passos</h2>
           <div className="grid md:grid-cols-3 gap-6">
             {proximosPassos.map((passo, index) => (
               <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
@@ -150,9 +127,7 @@ function SuccessInner() {
                   </div>
                   <h3 className="font-bold text-lg mb-2">{passo.title}</h3>
                   <p className="text-gray-600 mb-4">{passo.description}</p>
-                  <Button variant="outline" size="sm" className="w-full">
-                    {passo.action}
-                  </Button>
+                  <Button variant="outline" size="sm" className="w-full">{passo.action}</Button>
                 </CardContent>
               </Card>
             ))}
@@ -167,10 +142,7 @@ function SuccessInner() {
               <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
           </Link>
-          
-          <p className="text-gray-500 mt-4">
-            Você receberá um email de confirmação em breve
-          </p>
+          <p className="text-gray-500 mt-4">Você receberá um email de confirmação em breve</p>
         </div>
 
         {/* Suporte */}
@@ -181,20 +153,14 @@ function SuccessInner() {
               Nossa equipe está pronta para te ajudar a aproveitar ao máximo o PlantãoBoard
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button variant="outline">
-                📧 Enviar Email
-              </Button>
-              <Button variant="outline">
-                💬 Chat ao Vivo
-              </Button>
-              <Button variant="outline">
-                📱 WhatsApp
-              </Button>
+              <Button variant="outline">📧 Enviar Email</Button>
+              <Button variant="outline">💬 Chat ao Vivo</Button>
+              <Button variant="outline">📱 WhatsApp</Button>
             </div>
           </CardContent>
         </Card>
       </div>
-    </div>
+    </MobileShell>
   );
 }
 
@@ -205,4 +171,3 @@ export default function SuccessPage() {
     </Suspense>
   );
 }
-
