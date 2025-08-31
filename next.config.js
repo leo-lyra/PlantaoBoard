@@ -1,21 +1,26 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Configuração para funcionar no ambiente Lasy
-  assetPrefix: "",
-  basePath: "",
-  // Desabilitar strict mode para compatibilidade
-  reactStrictMode: false,
+  reactStrictMode: true,
 
-  // Configurações para melhor compatibilidade de deploy (baseado na v0)
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   images: {
-    unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
+        port: "",
+        pathname: "/storage/v1/object/**",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+    ],
+  },
+
+  experimental: {
+    typedRoutes: false,
   },
 };
 
 module.exports = nextConfig;
+
