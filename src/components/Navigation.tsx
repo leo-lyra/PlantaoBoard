@@ -42,13 +42,10 @@ function NavItems({
   activeTab,
   onTabChange,
   mobile = false,
-  afterClick,
 }: {
   activeTab: string;
   onTabChange: (tab: string) => void;
   mobile?: boolean;
-  /** opcional: fechar o drawer no mobile após clique */
-  afterClick?: () => void;
 }) {
   return (
     <div className={cn("flex flex-col gap-2", mobile ? "mt-4" : "")}>
@@ -56,21 +53,16 @@ function NavItems({
         const isActive = activeTab === id;
         return (
           <Button
-            type="button"
             key={id}
             variant="ghost"
-            aria-current={isActive ? "page" : undefined}
             className={cn(
-              "w-full justify-start gap-3 rounded-xl transition-all duration-200",
+              "w-full justify-start gap-3 transition-all duration-300 rounded-xl",
               mobile ? "h-14 text-base" : "h-12",
               isActive
                 ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg hover:from-blue-600 hover:to-purple-700"
-                : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                : "hover:bg-gray-100 text-gray-700 hover:text-gray-900"
             )}
-            onClick={() => {
-              onTabChange(id);
-              afterClick?.();
-            }}
+            onClick={() => onTabChange(id)}
           >
             <Icon className="h-5 w-5" />
             {label}
@@ -82,24 +74,13 @@ function NavItems({
 }
 
 export default function Navigation({ activeTab, onTabChange }: NavigationProps) {
-  const [open, setOpen] = React.useState(false);
-
   return (
     <>
       {/* DESKTOP SIDEBAR */}
-      <aside
-        className="
-          hidden md:flex
-          w-64 shrink-0
-          flex-col justify-between
-          border-r bg-white/70 backdrop-blur-sm
-          p-4
-          sticky top-0 min-h-screen
-        "
-      >
+      <aside className="hidden md:flex w-64 flex-col justify-between border-r bg-white/70 backdrop-blur-sm p-4">
         <div>
-          <div className="mb-6 flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-tr from-blue-600 to-purple-600 text-white">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-blue-600 to-purple-600 grid place-items-center text-white">
               <Stethoscope className="h-5 w-5" />
             </div>
             <div>
@@ -111,16 +92,16 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
           <NavItems activeTab={activeTab} onTabChange={onTabChange} />
         </div>
 
-        <div className="mt-6 border-t pt-4">
+        <div className="pt-4 border-t mt-6">
           <LogoutButton />
         </div>
       </aside>
 
       {/* MOBILE TOP BAR */}
-      <div className="sticky top-0 z-40 border-b bg-white/80 backdrop-blur md:hidden">
-        <div className="container mx-auto flex h-14 items-center justify-between px-4">
+      <div className="md:hidden sticky top-0 z-40 bg-white/80 backdrop-blur border-b">
+        <div className="container mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-tr from-blue-600 to-purple-600 text-white">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-tr from-blue-600 to-purple-600 grid place-items-center text-white">
               <Stethoscope className="h-4 w-4" />
             </div>
             <span className="font-semibold">PlantãoMed</span>
@@ -128,19 +109,19 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
 
           <div className="flex items-center gap-2">
             <LogoutButton />
-            <Sheet open={open} onOpenChange={setOpen}>
+            <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" aria-label="Menu">
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-[90%] sm:w-[380px]">
-                <div className="mb-4 flex items-center gap-3">
-                  <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-tr from-blue-600 to-purple-600 text-white">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-9 w-9 rounded-lg bg-gradient-to-tr from-blue-600 to-purple-600 grid place-items-center text-white">
                     <Stethoscope className="h-4 w-4" />
                   </div>
                   <div>
-                    <h2 className="leading-tight font-semibold">PlantãoMed</h2>
+                    <h2 className="font-semibold leading-tight">PlantãoMed</h2>
                     <p className="text-xs text-gray-500">Gestão de Plantões</p>
                   </div>
                 </div>
@@ -149,10 +130,9 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
                   activeTab={activeTab}
                   onTabChange={onTabChange}
                   mobile
-                  afterClick={() => setOpen(false)}
                 />
 
-                <div className="mt-6 border-t pt-4">
+                <div className="pt-4 border-t mt-6">
                   <LogoutButton />
                 </div>
               </SheetContent>
