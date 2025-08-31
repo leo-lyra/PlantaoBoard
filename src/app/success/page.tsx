@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import { Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
@@ -11,7 +12,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
-export default function SuccessPage() {
+function SuccessInner() {
   const [isLoading, setIsLoading] = useState(true);
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
@@ -194,5 +195,13 @@ export default function SuccessPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Carregando…</div>}>
+      <SuccessInner />
+    </Suspense>
   );
 }
