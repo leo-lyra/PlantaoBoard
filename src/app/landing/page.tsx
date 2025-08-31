@@ -113,8 +113,8 @@ export default function LandingPage() {
           
           <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
             Acompanhe facilmente seu <strong>faturamento por período</strong>, o que ainda está
-            <strong> pendente para receber</strong>, <strong>horas trabalhadas</strong> e muito mais!
-             Com dashboards profissionais e automação inteligente.
+            <strong> pendente para receber</strong>, todas suas <strong>horas trabalhadas</strong> e muito <strong>mais</strong>!
+             Com dashboards profissionais e automação inteligente, tudo na palma da mão.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
