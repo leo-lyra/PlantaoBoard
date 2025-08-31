@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -60,7 +60,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
               <Stethoscope className="h-8 w-8" />
             </div>
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold">PlantãoMed</h1>
+              <h1 className="text-3xl md:text-4xl font-bold">PlantãoBoard</h1>
               <p className="text-blue-100 text-lg">Gestão Inteligente de Plantões Médicos</p>
             </div>
           </div>

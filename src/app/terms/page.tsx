@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Stethoscope } from "lucide-react";
@@ -14,7 +14,7 @@ export default function TermsPage() {
             <Stethoscope className="h-6 w-6 text-white" />
           </div>
           <span className="text-2xl font-bold tracking-tight text-gray-900">
-            PlantãoMed
+            PlantãoBoard
           </span>
         </div>
 
@@ -104,10 +104,10 @@ export default function TermsPage() {
               <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
                 <Stethoscope className="h-6 w-6 text-white" />
               </div>
-              <span className="text-xl font-bold text-gray-900">PlantãoMed</span>
+              <span className="text-xl font-bold text-gray-900">PlantãoBoard</span>
             </div>
             <div className="text-center md:text-right">
-              <p>© {new Date().getFullYear()} PlantãoMed. Todos os direitos reservados.</p>
+              <p>© {new Date().getFullYear()} PlantãoBoard. Todos os direitos reservados.</p>
               <p className="text-sm mt-1">Gestão financeira inteligente para médicos</p>
             </div>
           </div>
@@ -116,3 +116,4 @@ export default function TermsPage() {
     </div>
   );
 }
+

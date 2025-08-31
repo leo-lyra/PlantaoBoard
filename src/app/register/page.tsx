@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -111,7 +111,7 @@ export default function RegisterPage() {
               <Stethoscope className="h-8 w-8 text-white" />
             </div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              PlantãoMed
+              PlantãoBoard
             </h1>
           </div>
           
@@ -290,3 +290,4 @@ export default function RegisterPage() {
     </div>
   );
 }
+

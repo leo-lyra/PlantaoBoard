@@ -1,4 +1,4 @@
-export interface HospitalData {
+﻿export interface HospitalData {
   nome: string;
   cidade: string;
   estado: string;

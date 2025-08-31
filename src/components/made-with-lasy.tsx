@@ -1,4 +1,4 @@
-export const MadeWithLasy = () => {
+﻿export const MadeWithLasy = () => {
   return (
     <div className="p-4 text-center">
       <a
@@ -12,3 +12,4 @@ export const MadeWithLasy = () => {
     </div>
   );
 };
+

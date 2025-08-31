@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { supabaseRoute } from "@/lib/supabase-route";
 
 export async function GET() {
@@ -11,3 +11,4 @@ export async function GET() {
     user: session?.user ?? null,
   });
 }
+

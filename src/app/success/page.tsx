@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useState } from 'react';
 import { Suspense } from 'react';
@@ -99,7 +99,7 @@ function SuccessInner() {
           
           <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl shadow-lg text-white">
             <Stethoscope className="h-6 w-6" />
-            <span className="text-lg font-semibold">Bem-vindo ao PlantãoMed Pro!</span>
+            <span className="text-lg font-semibold">Bem-vindo ao PlantãoBoard Pro!</span>
           </div>
         </div>
 
@@ -178,7 +178,7 @@ function SuccessInner() {
           <CardContent className="p-6 text-center">
             <h3 className="font-semibold mb-2">Precisa de Ajuda?</h3>
             <p className="text-gray-600 mb-4">
-              Nossa equipe está pronta para te ajudar a aproveitar ao máximo o PlantãoMed
+              Nossa equipe está pronta para te ajudar a aproveitar ao máximo o PlantãoBoard
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button variant="outline">
@@ -205,3 +205,4 @@ export default function SuccessPage() {
     </Suspense>
   );
 }
+

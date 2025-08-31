@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { Button } from "@/components/ui/button";
@@ -84,7 +84,7 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
               <Stethoscope className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="font-bold leading-tight">PlantãoMed</h1>
+              <h1 className="font-bold leading-tight">PlantãoBoard</h1>
               <p className="text-xs text-gray-500">Gestão de Plantões</p>
             </div>
           </div>
@@ -104,7 +104,7 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
             <div className="h-8 w-8 rounded-lg bg-gradient-to-tr from-blue-600 to-purple-600 grid place-items-center text-white">
               <Stethoscope className="h-4 w-4" />
             </div>
-            <span className="font-semibold">PlantãoMed</span>
+            <span className="font-semibold">PlantãoBoard</span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -121,7 +121,7 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
                     <Stethoscope className="h-4 w-4" />
                   </div>
                   <div>
-                    <h2 className="font-semibold leading-tight">PlantãoMed</h2>
+                    <h2 className="font-semibold leading-tight">PlantãoBoard</h2>
                     <p className="text-xs text-gray-500">Gestão de Plantões</p>
                   </div>
                 </div>
@@ -143,3 +143,4 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
     </>
   );
 }
+

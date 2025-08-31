@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect } from 'react';
 import Navigation from "@/components/Navigation";
@@ -138,7 +138,7 @@ export default function AppPage() {
                     Olá, {user?.user_metadata?.name || user?.email?.split('@')[0]}!
                   </h2>
                   <p className="text-sm text-gray-600">
-                    Bem-vindo ao PlantãoMed
+                    Bem-vindo ao PlantãoBoard
                   </p>
                 </div>
                 
@@ -215,7 +215,7 @@ export default function AppPage() {
                   <h3 className="text-lg font-semibold">Trial Expirado</h3>
                 </div>
                 <p className="mb-4">
-                  Seu período de teste terminou. Reative sua assinatura para continuar usando o PlantãoMed.
+                  Seu período de teste terminou. Reative sua assinatura para continuar usando o PlantãoBoard.
                 </p>
                 <Link href="/checkout">
                   <Button className="bg-white text-red-600 hover:bg-gray-100">
@@ -236,7 +236,7 @@ export default function AppPage() {
                       Acesso Limitado
                     </h2>
                     <p className="text-red-700 mb-6">
-                      Seu trial expirou. Reative sua assinatura para continuar usando todos os recursos do PlantãoMed.
+                      Seu trial expirou. Reative sua assinatura para continuar usando todos os recursos do PlantãoBoard.
                     </p>
                     <Link href="/checkout">
                       <Button className="bg-red-600 hover:bg-red-700 text-white">

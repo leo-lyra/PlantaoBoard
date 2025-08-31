@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 /**
@@ -51,3 +51,4 @@ export const config = {
   // Aplica em tudo, exceto assets estáticos e rotas que não precisam de auth
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)"],
 };
+

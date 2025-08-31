@@ -1,4 +1,4 @@
-export interface Plantao {
+﻿export interface Plantao {
   id: string;
   local: string;
   data: string;

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -19,14 +19,14 @@ export default function LandingPage() {
       preco: 9.90,
       periodo: 'mês',
       economia: null,
-      priceId: 'price_mensal_plantaomed'
+      priceId: 'price_mensal_PlantaoBoard'
     },
     anual: {
       preco: 95.04, // 9.90 * 12 * 0.8 (20% desconto)
       periodo: 'ano',
       economia: '20% OFF',
       precoMensal: 7.92,
-      priceId: 'price_anual_plantaomed'
+      priceId: 'price_anual_PlantaoBoard'
     }
   };
 
@@ -82,7 +82,7 @@ export default function LandingPage() {
               <Stethoscope className="h-6 w-6 text-white" />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              PlantãoMed
+              PlantãoBoard
             </span>
           </div>
           <div className="flex items-center gap-4">
@@ -102,7 +102,7 @@ export default function LandingPage() {
       <section className="py-20 px-4">
         <div className="container mx-auto text-center max-w-6xl">
           <Badge className="mb-6 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 border-blue-200">
-            🚀 Mais de 2.500 médicos já confiam no PlantãoMed
+            🚀 Mais de 2.500 médicos já confiam no PlantãoBoard
           </Badge>
           
           <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent leading-tight">
@@ -256,7 +256,7 @@ export default function LandingPage() {
               <CardHeader className="text-center pb-4">
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <Award className="h-6 w-6 text-blue-600" />
-                  <CardTitle className="text-2xl">PlantãoMed Pro</CardTitle>
+                  <CardTitle className="text-2xl">PlantãoBoard Pro</CardTitle>
                 </div>
                 {planos[planoSelecionado].economia && (
                   <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200 mb-4">
@@ -327,10 +327,10 @@ export default function LandingPage() {
               <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
                 <Stethoscope className="h-6 w-6 text-white" />
               </div>
-              <span className="text-xl font-bold">PlantãoMed</span>
+              <span className="text-xl font-bold">PlantãoBoard</span>
             </div>
             <div className="text-gray-400 text-center md:text-right">
-              <p>© {new Date().getFullYear()} PlantãoMed. Todos os direitos reservados.</p>
+              <p>© {new Date().getFullYear()} PlantãoBoard. Todos os direitos reservados.</p>
               <p className="text-sm mt-1">Gestão financeira inteligente para médicos</p>
             </div>
           </div>

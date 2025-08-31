@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect } from 'react';
 import { Suspense } from 'react';
@@ -139,7 +139,7 @@ function CheckoutInner() {
             Finalize Sua <span className="text-blue-600">Assinatura</span>
           </h1>
           <p className="text-xl text-gray-600">
-            Continue aproveitando todos os recursos do PlantãoMed
+            Continue aproveitando todos os recursos do PlantãoBoard
           </p>
         </div>
 
@@ -150,7 +150,7 @@ function CheckoutInner() {
               <CardHeader className="text-center pb-4">
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <Award className="h-6 w-6 text-blue-600" />
-                  <CardTitle className="text-2xl">PlantãoMed Pro</CardTitle>
+                  <CardTitle className="text-2xl">PlantãoBoard Pro</CardTitle>
                 </div>
                 {planos[planoSelecionado].economia && (
                   <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200 mb-4">
@@ -233,7 +233,7 @@ function CheckoutInner() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between items-center py-2 border-b">
-                  <span>PlantãoMed Pro ({planos[planoSelecionado].periodo})</span>
+                  <span>PlantãoBoard Pro ({planos[planoSelecionado].periodo})</span>
                   <span className="font-semibold">
                     R$ {planos[planoSelecionado].preco.toFixed(2).replace('.', ',')}
                   </span>
@@ -324,3 +324,4 @@ export default function CheckoutPage() {
     </Suspense>
   );
 }
+
