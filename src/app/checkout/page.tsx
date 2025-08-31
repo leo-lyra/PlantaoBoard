@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +14,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { toast } from 'sonner';
 
-export default function CheckoutPage() {
+function CheckoutInner() {
   const [planoSelecionado, setPlanoSelecionado] = useState<'mensal' | 'anual'>('anual');
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
@@ -313,5 +314,13 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Carregando checkout…</div>}>
+      <CheckoutInner />
+    </Suspense>
   );
 }
