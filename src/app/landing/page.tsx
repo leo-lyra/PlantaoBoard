@@ -106,15 +106,15 @@ export default function LandingPage() {
           </Badge>
           
           <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent leading-tight">
-            Transforme Seus Plantões em
+            Controle seus plantões e
             <br />
-            <span className="text-emerald-600">Renda Previsível</span>
+            <span className="text-emerald-600">Conquiste sua tranquilidade financeira</span>
           </h1>
           
           <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-            O único sistema que médicos precisam para <strong>controlar plantões</strong>, 
-            <strong> maximizar ganhos</strong> e <strong>planejar o futuro financeiro</strong> 
-            com dashboards profissionais e automação inteligente.
+            Acompanhe facilmente seu <strong>faturamento por período</strong>, o que ainda está
+            <strong> pendente para receber</strong>, <strong>horas trabalhadas</strong> e muito mais!
+             Com dashboards profissionais e automação inteligente.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
