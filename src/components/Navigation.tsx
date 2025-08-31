@@ -1,133 +1,132 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { 
-  Home, LayoutDashboard, Plus, List, Menu, Stethoscope,
-  Calendar, BarChart3, FileText
+import {
+  Home, LayoutDashboard, Plus, List, Menu,
+  Calendar, BarChart3, FileText, Stethoscope
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { LogoutButton } from '@/components/LogoutButton';
 
 interface NavigationProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
 }
 
-export function Navigation({ activeTab, onTabChange }: NavigationProps) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+type NavItem = {
+  id: string;
+  label: string;
+  Icon: React.ComponentType<{ className?: string }>;
+};
 
-  const menuItems = [
-    { id: 'home', label: 'Início', icon: Home },
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'cadastrar', label: 'Novo Plantão', icon: Plus },
-    { id: 'listar', label: 'Meus Plantões', icon: List },
-  ];
+const NAV_ITEMS: NavItem[] = [
+  { id: 'home',        label: 'Início',        Icon: Home },
+  { id: 'dashboard',   label: 'Dashboard',     Icon: LayoutDashboard },
+  { id: 'novo-plantao',label: 'Novo Plantão',  Icon: Plus },
+  { id: 'plantoes',    label: 'Meus Plantões', Icon: List },
+  { id: 'agenda',      label: 'Agenda',        Icon: Calendar },
+  { id: 'relatorios',  label: 'Relatórios',    Icon: FileText },
+  { id: 'estatisticas',label: 'Estatísticas',  Icon: BarChart3 },
+];
 
-  const NavItems = ({ mobile = false }) => (
-    <div className={cn("space-y-2", mobile ? "p-4" : "")}>
-      {menuItems.map((item) => {
-        const Icon = item.icon;
-        const isActive = activeTab === item.id;
+function NavItems({
+  activeTab,
+  onTabChange,
+  mobile = false,
+}: {
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+  mobile?: boolean;
+}) {
+  return (
+    <div className={cn('flex flex-col gap-2', mobile ? 'mt-4' : '')}>
+      {NAV_ITEMS.map(({ id, label, Icon }) => {
+        const isActive = activeTab === id;
         return (
           <Button
-            key={item.id}
-            variant="ghost"
+            key={id}
+            variant="ghost")
             className={cn(
-              "w-full justify-start gap-3 transition-all duration-300 rounded-xl",
-              mobile ? "h-14 text-base" : "h-12",
-              isActive 
-                ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg hover:from-blue-600 hover:to-purple-700" 
-                : "hover:bg-gray-100 text-gray-700 hover:text-gray-900"
+              'w-full justify-start gap-3 transition-all duration-300 rounded-xl',
+              mobile ? 'h-14 text-base' : 'h-12',
+              isActive
+                ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg hover:from-blue-600 hover:to-purple-700'
+                : 'hover:bg-gray-100 text-gray-700 hover:text-gray-900'
             )}
-            onClick={() => {
-              onTabChange(item.id);
-              if (mobile) setMobileMenuOpen(false);
-            }}
+            onClick={() => onTabChange(id)}
           >
-            <Icon className={cn("h-5 w-5", isActive && "text-white")} />
-            <span className="font-medium">{item.label}</span>
+            <Icon className="h-5 w-5" />
+            {label}
           </Button>
         );
       })}
     </div>
   );
+}
 
+export default function Navigation({ activeTab, onTabChange }: NavigationProps) {
   return (
     <>
-      {/* Desktop Navigation */}
-      <div className="hidden md:flex md:w-72 md:flex-col md:fixed md:inset-y-0 z-50">
-        <div className="flex flex-col flex-grow bg-white border-r border-gray-200 shadow-xl">
-          {/* Header */}
-          <div className="flex items-center px-6 py-8 border-b border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
-                <Stethoscope className="h-7 w-7 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  PlantãoMed
-                </h1>
-                <p className="text-sm text-gray-500 font-medium">Gestão de Plantões</p>
-              </div>
-            </div>
-          </div>
-          
-          {/* Navigation */}
-          <div className="flex-1 px-4 py-6">
-            <nav className="space-y-2">
-              <NavItems />
-            </nav>
-          </div>
-
-          {/* Footer */}
-          <div className="p-4 border-t border-gray-100">
-            <div className="text-center">
-              <p className="text-xs text-gray-400">
-                Versão 1.0 • Made with ❤️
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Navigation */}
-      <div className="md:hidden">
-        <div className="flex items-center justify-between p-4 bg-white border-b border-gray-200 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg shadow-lg">
-              <Stethoscope className="h-6 w-6 text-white" />
+      {/* DESKTOP SIDEBAR */}
+      <aside className="hidden md:flex w-64 flex-col justify-between border-r bg-white/70 backdrop-blur-sm p-4">
+        <div>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-blue-600 to-purple-600 grid place-items-center text-white">
+              <Stethoscope className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                PlantãoMed
-              </h1>
+              <h1 className="font-bold leading-tight">PlantãoMed</h1>
+              <p className="text-xs text-gray-500">Gestão de Plantões</p>
             </div>
           </div>
-          
-          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="sm" className="p-2">
-                <Menu className="h-6 w-6" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-80 p-0">
-              <div className="flex items-center gap-3 p-6 border-b border-gray-100">
-                <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
-                  <Stethoscope className="h-6 w-6 text-white" />
+
+          <NavItems activeTab={activeTab} onTabChange={onTabChange} />
+        </div>
+
+        <div className="pt-4 border-t mt-6">
+          <LogoutButton />
+        </div>
+      </aside>
+
+      {/* MOBILE TOP BAR */}
+      <div className="md:hidden sticky top-0 z-40 bg-white/80 backdrop-blur border-b">
+        <div className="container mx-auto px-4 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-tr from-blue-600 to-purple-600 grid place-items-center text-white">
+              <Stethoscope className="h-4 w-4" />
+            </div>
+            <span className="font-semibold">PlantãoMed</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <LogoutButton />
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="Menu">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[90%] sm:w-[380px]">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-9 w-9 rounded-lg bg-gradient-to-tr from-blue-600 to-purple-600 grid place-items-center text-white">
+                    <Stethoscope className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <h2 className="font-semibold leading-tight">PlantãoMed</h2>
+                    <p className="text-xs text-gray-500">Gestão de Plantões</p>
+                  </div>
                 </div>
-                <div>
-                  <h1 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    PlantãoMed
-                  </h1>
-                  <p className="text-sm text-gray-500">Gestão de Plantões</p>
+
+                <NavItems activeTab={activeTab} onTabChange={onTabChange} mobile />
+
+                <div className="pt-4 border-t mt-6">
+                  <LogoutButton />
                 </div>
-              </div>
-              <div className="py-4">
-                <NavItems mobile />
-              </div>
-            </SheetContent>
-          </Sheet>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </div>
     </>

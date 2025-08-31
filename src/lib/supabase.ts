@@ -1,6 +1,38 @@
-import { createClient } from '@supabase/supabase-js'
+// src/lib/supabase.ts
 
-const supabaseUrl = 'https://stylhfkfuzjuydcdjatf.supabase.co'
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0eWxoZmtmdXpqdXlkY2RqYXRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMTQ3MjMsImV4cCI6MjA3MTg5MDcyM30.9DQY8Df2Z0VJQszYF8vhpujNaFpHX1vmw-0G-2hAzqw'
+import { cookies } from "next/headers";
+import {
+  createClientComponentClient,
+  createServerComponentClient,
+  createRouteHandlerClient,
+} from "@supabase/auth-helpers-nextjs";
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Se você não gerou os tipos do Supabase ainda, pode trocar <any> por nada
+type DB = any;
+
+/**
+ * Cliente para COMPONENTES CLIENT (use em páginas/Componentes com "use client")
+ * Exemplo:
+ *   const supabase = supabaseBrowser();
+ */
+export function supabaseBrowser() {
+  return createClientComponentClient<DB>();
+}
+
+/**
+ * Cliente para SERVER COMPONENTS (RSC) — ex.: em `app/page.tsx` (sem "use client")
+ * Exemplo:
+ *   const supabase = supabaseServer();
+ */
+export function supabaseServer() {
+  return createServerComponentClient<DB>({ cookies });
+}
+
+/**
+ * Cliente para ROUTE HANDLERS (arquivos em `app/api/**/route.ts`)
+ * Exemplo:
+ *   const supabase = supabaseRoute();
+ */
+export function supabaseRoute() {
+  return createRouteHandlerClient<DB>({ cookies });
+}

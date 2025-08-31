@@ -1,64 +1,43 @@
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next();
-  const supabase = createMiddlewareClient({ req, res });
+/**
+ * Middleware de proteção de rotas para Next.js (Edge Runtime).
+ * ✅ Não importa Supabase no Edge (evita avisos/erros de Node API no Edge)
+ * ✅ Verifica sessão apenas pelos cookies de auth do Supabase
+ * ✅ Protege /app/*
+ * ✅ Redireciona usuário logado que tenta acessar /login ou /register
+ */
+export function middleware(req: NextRequest) {
+  const { nextUrl, cookies } = req;
+  const pathname = nextUrl.pathname;
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  // Cookies de sessão mais comuns do Supabase (v2)
+  const hasSession =
+    cookies.get("sb-access-token")?.value ||
+    cookies.get("sb-refresh-token")?.value ||
+    cookies.get("supabase-auth-token")?.value; // fallback versões antigas
 
-  // Rotas públicas que não precisam de autenticação
-  const publicRoutes = ['/landing', '/login', '/register', '/forgot-password', '/terms', '/privacy'];
-  const isPublicRoute = publicRoutes.some(route => req.nextUrl.pathname.startsWith(route));
+  const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register");
+  const isProtected = pathname.startsWith("/app");
 
-  // Redirecionar para landing se não estiver logado e tentar acessar rota protegida
-  if (!session && !isPublicRoute && req.nextUrl.pathname !== '/') {
-    return NextResponse.redirect(new URL('/landing', req.url));
+  // 1) Protege /app: se não logado, manda para /login?next=<destino>
+  if (isProtected && !hasSession) {
+    const loginUrl = new URL("/login", req.url);
+    loginUrl.searchParams.set("next", pathname + nextUrl.search);
+    return NextResponse.redirect(loginUrl);
   }
 
-  // Se estiver logado e tentar acessar rotas de auth, redirecionar para app
-  if (session && (req.nextUrl.pathname === '/login' || req.nextUrl.pathname === '/register')) {
-    return NextResponse.redirect(new URL('/app', req.url));
+  // 2) Se já logado, evitar ir para /login ou /register
+  if (isAuthPage && hasSession) {
+    return NextResponse.redirect(new URL("/app", req.url));
   }
 
-  // Verificar status da assinatura para rotas do app
-  if (session && req.nextUrl.pathname.startsWith('/app')) {
-    try {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('subscription_status, trial_ends_at')
-        .eq('id', session.user.id)
-        .single();
-
-      const now = new Date();
-      const trialEndsAt = profile?.trial_ends_at ? new Date(profile.trial_ends_at) : null;
-      
-      // Verificar se o trial expirou e não tem assinatura ativa
-      if (profile?.subscription_status !== 'active' && trialEndsAt && now > trialEndsAt) {
-        return NextResponse.redirect(new URL('/checkout', req.url));
-      }
-    } catch (error) {
-      console.error('Erro ao verificar assinatura:', error);
-    }
-  }
-
-  // Redirecionar root para landing ou app baseado no status de login
-  if (req.nextUrl.pathname === '/') {
-    if (session) {
-      return NextResponse.redirect(new URL('/app', req.url));
-    } else {
-      return NextResponse.redirect(new URL('/landing', req.url));
-    }
-  }
-
-  return res;
+  // 3) Demais casos: segue o fluxo normal
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
-  ],
+  // Aplica em todas as rotas exceto assets estáticos e API
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };
