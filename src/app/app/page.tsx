@@ -7,6 +7,7 @@ import { Dashboard } from '@/components/Dashboard';
 import { PlantaoForm } from '@/components/PlantaoForm';
 import { PlantaoList } from '@/components/PlantaoList';
 import { PlantaoProvider } from '@/contexts/PlantaoContext';
+import { supabaseServer } from "@/lib/supabase-server";
 import { Toaster } from '@/components/ui/sonner';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';

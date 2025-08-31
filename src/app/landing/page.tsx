@@ -1,194 +1,341 @@
 "use client";
 
 import React, { useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import {
-  Stethoscope, Check, Star, Users, TrendingUp, Shield,
-  Zap, BarChart3, Clock, DollarSign, ArrowRight,
-  CheckCircle, Award, Target
+import { 
+  Stethoscope, Check, Star, Users, TrendingUp, Shield, 
+  Zap, BarChart3, Clock, DollarSign, ArrowRight, 
+  CheckCircle, Quote, Play, Award, Target
 } from 'lucide-react';
+import Link from 'next/link';
 
 export default function LandingPage() {
   const [planoSelecionado, setPlanoSelecionado] = useState<'mensal' | 'anual'>('anual');
 
-  const precoMensal = 12.90; // exemplo
-  const precoAnual = 95.04;  // R$ 7,92/mês
-  const precoExibido = planoSelecionado === 'anual' ? precoAnual : precoMensal;
+  const planos = {
+    mensal: {
+      preco: 9.90,
+      periodo: 'mês',
+      economia: null,
+      priceId: 'price_mensal_plantaomed'
+    },
+    anual: {
+      preco: 95.04, // 9.90 * 12 * 0.8 (20% desconto)
+      periodo: 'ano',
+      economia: '20% OFF',
+      precoMensal: 7.92,
+      priceId: 'price_anual_plantaomed'
+    }
+  };
+
+  const beneficios = [
+    'Dashboard completo com analytics avançados',
+    'Controle de plantões e pagamentos',
+    'Relatórios financeiros detalhados',
+    'Cálculo automático de impostos',
+    'Backup automático na nuvem',
+    'Acesso em qualquer dispositivo',
+    'Suporte técnico prioritário',
+    'Atualizações automáticas'
+  ];
+
+  const depoimentos = [
+    {
+      nome: 'Dr. Carlos Silva',
+      especialidade: 'Cardiologista',
+      foto: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=100&h=100&fit=crop&crop=face',
+      texto: 'Revolucionou minha gestão financeira! Agora tenho controle total dos meus plantões e consigo planejar melhor meus investimentos.',
+      rating: 5
+    },
+    {
+      nome: 'Dra. Ana Costa',
+      especialidade: 'Pediatra',
+      foto: 'https://images.unsplash.com/photo-1594824475317-d3c2b8b5e3b5?w=100&h=100&fit=crop&crop=face',
+      texto: 'Interface intuitiva e relatórios precisos. Economizo horas por semana que antes gastava organizando planilhas.',
+      rating: 5
+    },
+    {
+      nome: 'Dr. Roberto Lima',
+      especialidade: 'Ortopedista',
+      foto: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=100&h=100&fit=crop&crop=face',
+      texto: 'O melhor investimento que fiz para minha carreira. ROI incrível e suporte excepcional da equipe.',
+      rating: 5
+    }
+  ];
+
+  const estatisticas = [
+    { numero: '2.500+', label: 'Médicos Ativos' },
+    { numero: 'R$ 50M+', label: 'Gerenciados' },
+    { numero: '98%', label: 'Satisfação' },
+    { numero: '24/7', label: 'Suporte' }
+  ];
 
   return (
-    <main>
-      {/* HERO */}
-      <section className="container mx-auto px-4 py-12 md:py-20">
-        <div className="flex items-center justify-center mb-4">
-          <Badge className="text-xs">Novo • Beta Público</Badge>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-10 items-center">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
-              Transforme Seus Plantões em <span className="text-blue-600">Renda Previsível</span>
-            </h1>
-            <p className="mt-4 text-lg text-muted-foreground">
-              O único sistema que médicos precisam para <strong>controlar plantões</strong>,
-              <strong> maximizar ganhos</strong> e <strong>planejar o futuro financeiro</strong> com dashboards profissionais e automação inteligente.
-            </p>
-
-            <div className="mt-6 flex gap-3 flex-wrap">
-              <Link href="/register" className="inline-flex items-center justify-center rounded-md px-5 py-3 bg-blue-600 text-white font-medium hover:opacity-90">
-                Começar Agora — 7 Dias Grátis
-              </Link>
-              <Link href="/login" className="inline-flex items-center justify-center rounded-md px-5 py-3 border text-sm font-medium">
-                Ver Demo
-              </Link>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Header */}
+      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
+              <Stethoscope className="h-6 w-6 text-white" />
             </div>
-
-            <ul className="mt-5 text-sm text-muted-foreground grid grid-cols-3 gap-2 max-w-md">
-              <li><strong>2.500+</strong> Médicos</li>
-              <li><strong>R$ 50M+</strong> Gerenciados</li>
-              <li><strong>98%</strong> Satisfação</li>
-            </ul>
+            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              PlantãoMed
+            </span>
           </div>
-
-          <div className="relative w-full aspect-[4/3]">
-            <Image
-              src="/dashboard-hero.png"
-              alt="Visão do dashboard financeiro do PlantãoMed"
-              fill
-              priority
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="rounded-xl shadow-2xl object-cover"
-            />
-          </div>
-        </div>
-
-        <p className="text-sm text-muted-foreground mt-4">
-          ✅ Sem compromisso • ✅ Cancele quando quiser • 🔒 Pagamento seguro
-        </p>
-      </section>
-
-      {/* BENEFÍCIOS */}
-      <section className="container mx-auto px-4 py-12">
-        <div className="grid md:grid-cols-3 gap-6">
-          {[
-            { Icon: BarChart3, title: 'Dashboard de Ganhos', desc: 'Visualize seus ganhos por hospital, turno e mês com clareza.' },
-            { Icon: Clock, title: 'Escalas Inteligentes', desc: 'Monte sua escala com conflito zero e alertas automáticos.' },
-            { Icon: Shield, title: 'Segurança & Privacidade', desc: 'Seus dados criptografados e hospedados no Brasil.' },
-          ].map(({ Icon, title, desc }) => (
-            <Card key={title} className="border-0 shadow-lg">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <Icon className="text-blue-600" />
-                  <CardTitle>{title}</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="text-muted-foreground">{desc}</CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      {/* DEPOIMENTOS */}
-      <section className="container mx-auto px-4 py-12">
-        <h2 className="text-2xl font-bold mb-6">O que os médicos dizem</h2>
-        <div className="grid md:grid-cols-3 gap-6">
-          {[
-            { nome: 'Dr. Carlos', especialidade: 'Cardiologista', texto: 'Centralizei tudo e aumentei meu faturamento em 18%.' },
-            { nome: 'Dra. Ana', especialidade: 'Pediatra', texto: 'Economizei horas por semana com a escala automática.' },
-            { nome: 'Dr. Pedro', especialidade: 'Intensivista', texto: 'Relatórios que facilitam negociar com os hospitais.' },
-          ].map((t) => (
-            <Card key={t.nome} className="border-0 shadow-lg">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">{t.nome} — {t.especialidade}</CardTitle>
-              </CardHeader>
-              <CardContent className="text-muted-foreground text-sm">
-                “{t.texto}”
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      {/* PLANOS */}
-      <section className="container mx-auto px-4 py-12">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold">Planos</h2>
-          <div className="flex items-center gap-2 text-sm">
-            <span className={planoSelecionado === 'mensal' ? 'font-semibold' : ''}>Mensal</span>
-            <Button variant="outline" size="sm" onClick={() => setPlanoSelecionado(p => p === 'mensal' ? 'anual' : 'mensal')}>
-              Alternar
-            </Button>
-            <span className={planoSelecionado === 'anual' ? 'font-semibold' : ''}>Anual</span>
-            <Badge className="ml-2">-39%</Badge>
-          </div>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {[
-            {
-              nome: 'Essencial',
-              preco: planoSelecionado === 'anual' ? 'R$ 0' : 'R$ 0',
-              destaque: 'Para começar',
-              itens: ['Cadastro de plantões', 'Relatórios básicos', '1 hospital']
-            },
-            {
-              nome: 'Profissional',
-              preco: planoSelecionado === 'anual' ? `R$ ${precoExibido.toFixed(2)}/ano` : `R$ ${precoExibido.toFixed(2)}/mês`,
-              destaque: 'Mais vendido',
-              itens: ['Dashboards avançados', 'Escala inteligente', 'Exportações e filtros'],
-              popular: true
-            },
-            {
-              nome: 'Enterprise',
-              preco: 'Sob consulta',
-              destaque: 'Para grupos',
-              itens: ['Integrações', 'Suporte dedicado', 'Treinamento']
-            }
-          ].map((p) => (
-            <Card key={p.nome} className={p.popular ? 'border-2 border-blue-600 shadow-2xl' : 'shadow-lg'}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>{p.nome}</CardTitle>
-                  {p.popular && <Badge>Popular</Badge>}
-                </div>
-                <div className="text-2xl mt-2">{p.preco}</div>
-                <div className="text-xs text-muted-foreground">{p.destaque}</div>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 mb-4">
-                  {p.itens.map((i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Check className="h-4 w-4 text-emerald-600" /> {i}
-                    </li>
-                  ))}
-                </ul>
-                <Link href={p.nome === 'Profissional' ? '/register?plan=pro' : '/register'} className="inline-flex w-full items-center justify-center rounded-md px-4 py-2 bg-blue-600 text-white font-medium hover:opacity-90">
-                  Começar Agora
-                </Link>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      {/* CTA FINAL */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="rounded-2xl p-8 md:p-12 bg-gradient-to-r from-blue-600 to-blue-800 text-white text-center shadow-xl">
-          <h2 className="text-3xl md:text-4xl font-bold">Pronto para organizar seus plantões?</h2>
-          <p className="mt-3 text-white/90">Comece grátis e migre seus dados quando quiser.</p>
-          <div className="mt-6 flex gap-3 justify-center">
-            <Link href="/register" className="inline-flex items-center justify-center rounded-md px-5 py-3 bg-white text-blue-700 font-medium">
-              Criar conta grátis <ArrowRight className="ml-2 h-4 w-4" />
+          <div className="flex items-center gap-4">
+            <Link href="/login">
+              <Button variant="ghost">Entrar</Button>
             </Link>
-            <Link href="/login" className="inline-flex items-center justify-center rounded-md px-5 py-3 border border-white/30 text-white/90">
+            <Link href="#pricing">
+              <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+                Começar Agora
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="py-20 px-4">
+        <div className="container mx-auto text-center max-w-6xl">
+          <Badge className="mb-6 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 border-blue-200">
+            🚀 Mais de 2.500 médicos já confiam no PlantãoMed
+          </Badge>
+          
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent leading-tight">
+            Transforme Seus Plantões em
+            <br />
+            <span className="text-emerald-600">Renda Previsível</span>
+          </h1>
+          
+          <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+            O único sistema que médicos precisam para <strong>controlar plantões</strong>, 
+            <strong> maximizar ganhos</strong> e <strong>planejar o futuro financeiro</strong> 
+            com dashboards profissionais e automação inteligente.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+            <Link href="#pricing">
+              <Button size="lg" className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-lg px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+                <Play className="h-5 w-5 mr-2" />
+                Começar Teste Grátis
+              </Button>
+            </Link>
+            <Button size="lg" variant="outline" className="text-lg px-8 py-4 rounded-xl border-2 hover:bg-gray-50">
+              <BarChart3 className="h-5 w-5 mr-2" />
               Ver Demo
-            </Link>
+            </Button>
+          </div>
+
+          {/* Estatísticas */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
+            {estatisticas.map((stat, index) => (
+              <div key={index} className="text-center">
+                <div className="text-3xl md:text-4xl font-bold text-blue-600 mb-2">{stat.numero}</div>
+                <div className="text-gray-600 font-medium">{stat.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
-    </main>
+
+      {/* Prova Social */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Médicos Aumentaram Sua Renda em <span className="text-emerald-600">Até 40%</span>
+            </h2>
+            <p className="text-xl text-gray-600">
+              Veja como profissionais transformaram sua gestão financeira
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {depoimentos.map((depoimento, index) => (
+              <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-1 mb-4">
+                    {[...Array(depoimento.rating)].map((_, i) => (
+                      <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                  <Quote className="h-8 w-8 text-blue-200 mb-4" />
+                  <p className="text-gray-700 mb-6 leading-relaxed">"{depoimento.texto}"</p>
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src={depoimento.foto} 
+                      alt={depoimento.nome}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                    <div>
+                      <div className="font-semibold text-gray-900">{depoimento.nome}</div>
+                      <div className="text-sm text-gray-600">{depoimento.especialidade}</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Benefícios */}
+      <section className="py-16 bg-gradient-to-br from-blue-50 to-purple-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Tudo Que Você Precisa em <span className="text-blue-600">Uma Plataforma</span>
+            </h2>
+            <p className="text-xl text-gray-600">
+              Recursos profissionais para médicos que querem crescer
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            {[
+              { icon: BarChart3, title: 'Analytics Avançados', desc: 'Dashboards profissionais com insights financeiros' },
+              { icon: Shield, title: 'Dados Seguros', desc: 'Criptografia bancária e backup automático' },
+              { icon: Zap, title: 'Automação', desc: 'Cálculos automáticos de impostos e relatórios' },
+              { icon: Target, title: 'Metas Claras', desc: 'Planejamento financeiro e projeções de renda' }
+            ].map((feature, index) => (
+              <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+                <CardContent className="p-6 text-center">
+                  <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl w-fit mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <feature.icon className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="font-bold text-lg mb-2">{feature.title}</h3>
+                  <p className="text-gray-600">{feature.desc}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section id="pricing" className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Invista em Seu <span className="text-emerald-600">Futuro Financeiro</span>
+            </h2>
+            <p className="text-xl text-gray-600 mb-8">
+              Planos que se pagam sozinhos com a otimização dos seus ganhos
+            </p>
+            
+            <div className="flex items-center justify-center gap-4 mb-8">
+              <span className={`font-medium ${planoSelecionado === 'mensal' ? 'text-blue-600' : 'text-gray-500'}`}>
+                Mensal
+              </span>
+              <button
+                onClick={() => setPlanoSelecionado(planoSelecionado === 'mensal' ? 'anual' : 'mensal')}
+                className="relative w-14 h-7 bg-blue-600 rounded-full transition-colors duration-300"
+              >
+                <div className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-transform duration-300 ${
+                  planoSelecionado === 'anual' ? 'translate-x-8' : 'translate-x-1'
+                }`} />
+              </button>
+              <span className={`font-medium ${planoSelecionado === 'anual' ? 'text-blue-600' : 'text-gray-500'}`}>
+                Anual
+              </span>
+              {planoSelecionado === 'anual' && (
+                <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200">
+                  Economize 20%
+                </Badge>
+              )}
+            </div>
+          </div>
+
+          <div className="max-w-lg mx-auto">
+            <Card className="border-2 border-blue-500 shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-purple-600"></div>
+              <CardHeader className="text-center pb-4">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Award className="h-6 w-6 text-blue-600" />
+                  <CardTitle className="text-2xl">PlantãoMed Pro</CardTitle>
+                </div>
+                {planos[planoSelecionado].economia && (
+                  <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200 mb-4">
+                    {planos[planoSelecionado].economia}
+                  </Badge>
+                )}
+                <div className="text-center">
+                  <div className="text-4xl font-bold text-blue-600 mb-2">
+                    R$ {planos[planoSelecionado].preco.toFixed(2).replace('.', ',')}
+                  </div>
+                  <div className="text-gray-600">
+                    por {planos[planoSelecionado].periodo}
+                    {planoSelecionado === 'anual' && (
+                      <div className="text-sm text-emerald-600 font-medium">
+                        R$ {planos.anual.precoMensal?.toFixed(2).replace('.', ',')}/mês
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {beneficios.map((beneficio, index) => (
+                  <div key={index} className="flex items-center gap-3">
+                    <CheckCircle className="h-5 w-5 text-emerald-500 flex-shrink-0" />
+                    <span className="text-gray-700">{beneficio}</span>
+                  </div>
+                ))}
+                
+                <Link href="/register" className="block">
+                  <Button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-lg py-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 mt-6">
+                    Começar Agora - 7 Dias Grátis
+                    <ArrowRight className="h-5 w-5 ml-2" />
+                  </Button>
+                </Link>
+                
+                <div className="text-center text-sm text-gray-500 mt-4">
+                  ✅ Sem compromisso • ✅ Cancele quando quiser • ✅ Suporte 24/7
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Final */}
+      <section className="py-16 bg-gradient-to-r from-blue-600 to-purple-700 text-white">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Pronto Para Transformar Sua Gestão Financeira?
+          </h2>
+          <p className="text-xl mb-8 opacity-90">
+            Junte-se a mais de 2.500 médicos que já otimizaram seus ganhos
+          </p>
+          <Link href="/register">
+            <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+              Começar Teste Grátis Agora
+              <ArrowRight className="h-5 w-5 ml-2" />
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between">
+            <div className="flex items-center gap-3 mb-4 md:mb-0">
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
+                <Stethoscope className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-xl font-bold">PlantãoMed</span>
+            </div>
+            <div className="text-gray-400 text-center md:text-right">
+              <p>© 2024 PlantãoMed. Todos os direitos reservados.</p>
+              <p className="text-sm mt-1">Gestão financeira inteligente para médicos</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
   );
 }
