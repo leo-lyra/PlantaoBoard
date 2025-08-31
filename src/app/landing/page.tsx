@@ -330,7 +330,7 @@ export default function LandingPage() {
               <span className="text-xl font-bold">PlantãoMed</span>
             </div>
             <div className="text-gray-400 text-center md:text-right">
-              <p>© 2024 PlantãoMed. Todos os direitos reservados.</p>
+              <p>© {new Date().getFullYear()} PlantãoMed. Todos os direitos reservados.</p>
               <p className="text-sm mt-1">Gestão financeira inteligente para médicos</p>
             </div>
           </div>
