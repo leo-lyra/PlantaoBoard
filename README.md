@@ -97,3 +97,4 @@ Confira nossa [documentação de deployment do Next.js](https://nextjs.org/docs/
 _Template otimizado para uso com Lasy AI - builds consistentes e deploys sem problemas!_
 "# PlantaoBoard" 
 "# PlantaoBoard"  
+"# PlantaoBoard" 
